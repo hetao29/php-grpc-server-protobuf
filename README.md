@@ -1,5 +1,5 @@
 # php-protobuf-server
-The php protobuf server framework
+The php protobuf server framework or route.
 
 # Architecture
 
