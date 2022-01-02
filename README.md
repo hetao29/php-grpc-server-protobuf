@@ -58,7 +58,7 @@ class Greeter{
 	 * @return HelloReply
 	 */
 	public function SayHello($data){
-		$request = \Grpc\Parser::deserializeMessage([HelloRequest::class, null], $data);
+		$request = \GRpcServer::decode(HelloRequest::class, $data);
 		$reply = new HelloReply();
 		$reply->setMessage("Hello, ".$request->getName()."!");
 		return $reply;
