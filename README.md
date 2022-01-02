@@ -1,4 +1,4 @@
-# php-grpc-server
+# php-grpc-protofu-server
 The php grpc server framework with protobuf and DO NOT use any 3rd libraries.
 
 # Architecture
