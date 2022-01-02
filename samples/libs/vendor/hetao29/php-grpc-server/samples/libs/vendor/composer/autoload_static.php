@@ -6,6 +6,10 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit9f672e3e6e3faf45eb5409007e431b67
 {
+    public static $files = array (
+        '7bb1c5fbd70ed4685bd6a1bd46069ee1' => __DIR__ . '/..' . '/hetao29/php-grpc-server/GRpcServer.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'G' => 
         array (
