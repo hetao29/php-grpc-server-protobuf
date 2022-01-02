@@ -3,7 +3,7 @@ The php grpc server framework with protobuf and DO NOT use any 3rd libraries.
 
 # Architecture
 
-gRPC Client  => nginx => php-fpm => this framework
+gRPC Client  => nginx => php-fpm => this framework => custom services
 
 # Process
 
