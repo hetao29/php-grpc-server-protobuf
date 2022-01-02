@@ -3,7 +3,7 @@ The php protobuf server framework or route.
 
 # Architecture
 
-gRPC Client  => nginx [gRPC Gateway](https://www.nginx.com/blog/deploying-nginx-plus-as-an-api-gateway-part-3-publishing-grpc-services/) => php-fpm => this framework
+gRPC Client  => nginx => php-fpm => this framework
 
 # Process
 
