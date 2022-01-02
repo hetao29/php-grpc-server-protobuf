@@ -109,17 +109,17 @@
         },
         {
             "name": "hetao29/php-grpc-server",
-            "version": "dev-main",
-            "version_normalized": "dev-main",
+            "version": "1.0.0",
+            "version_normalized": "1.0.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hetao29/php-grpc-server.git",
-                "reference": "7294769315007830c178c896a9bf46d3d9ffa856"
+                "reference": "2fc30d01e9a28cefbfa231bc988d870f35880f81"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hetao29/php-grpc-server/zipball/7294769315007830c178c896a9bf46d3d9ffa856",
-                "reference": "7294769315007830c178c896a9bf46d3d9ffa856",
+                "url": "https://api.github.com/repos/hetao29/php-grpc-server/zipball/2fc30d01e9a28cefbfa231bc988d870f35880f81",
+                "reference": "2fc30d01e9a28cefbfa231bc988d870f35880f81",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -132,8 +132,7 @@
                 "google/protobuf": "^3.7",
                 "grpc/grpc": "^1.10.0"
             },
-            "time": "2022-01-02T11:32:30+00:00",
-            "default-branch": true,
+            "time": "2022-01-02T11:57:16+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -164,7 +163,7 @@
             ],
             "support": {
                 "issues": "https://github.com/hetao29/php-grpc-server/issues",
-                "source": "https://github.com/hetao29/php-grpc-server/tree/main"
+                "source": "https://github.com/hetao29/php-grpc-server/tree/1.0.0"
             },
             "install-path": "../hetao29/php-grpc-server"
         }
