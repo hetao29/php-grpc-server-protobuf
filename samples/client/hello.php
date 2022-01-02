@@ -4,7 +4,6 @@ require_once("../libs/vendor/autoload.php");
 define("ROOT_PROTO_GENERATED","../proto_generated/");
 spl_autoload_register(function($class){
 	$root = ROOT_PROTO_GENERATED."/".str_replace("\\","/",$class).".php";
-	require_once($root);
 	if(is_file($root)){
 		require_once($root);
 	}
