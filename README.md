@@ -1,5 +1,5 @@
-# php-protobuf-server
-The php protobuf server framework or route.
+# php-grpc-server
+The php grpc server framework with protobuf and DO NOT use any 3rd libraries.
 
 # Architecture
 
