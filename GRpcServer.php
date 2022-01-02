@@ -147,5 +147,5 @@ final class GRpcServer{
             return [$reply, $status, $response];
         }
     }
-
 }
+endif;
