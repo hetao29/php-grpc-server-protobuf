@@ -10,7 +10,7 @@ gRPC Client  => nginx => php-fpm => this framework => custom services
 1. install with composer
 
 ```bash
-composer require "hetao29/php-grpc-server:1.0.0"
+composer require "hetao29/php-grpc-server:1.0.1"
 ```
 
 2. use in php file, like samples/www/index.php
@@ -58,7 +58,7 @@ class Greeter{
 	 * @return HelloReply
 	 */
 	public function SayHello($data){
-		$request = \Grpc\Parser::deserializeMessage([HelloRequest::class, null], $data);
+		$request = \GRpcServer::decode(HelloRequest::class, $data);
 		$reply = new HelloReply();
 		$reply->setMessage("Hello, ".$request->getName()."!");
 		return $reply;

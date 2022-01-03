@@ -1,4 +1,5 @@
 <?php
+ob_start();
 define("ROOT",						dirname(__FILE__)."/../");
 define("ROOT_LIBS",					ROOT."/libs");
 define("ROOT_APP",					ROOT."/app");
@@ -20,3 +21,4 @@ spl_autoload_register(function($class){
 if(($r=GRpcServer::run())!==false){
 	echo($r);
 }
+$a = ob_get_contents();

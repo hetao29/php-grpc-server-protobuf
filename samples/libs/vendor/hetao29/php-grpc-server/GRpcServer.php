@@ -35,15 +35,24 @@ if(!class_exists("GRpcServer",false)):
 				$ref = new ReflectionClass($class_name);
 				$params = $ref->getMethod($func_name)->getParameters();
 				if($params){
-					$param_name= $params[0]->getType()->getName();;
-					$ref_param = new ReflectionClass($param_name);
-					if($ref_param->hasMethod("mergeFromString")){
-						$class = new $class_name();
-						$request = self::decode($param_name,$data);
-						$response = $class->$func_name($request);
-						header("grpc-status: 0");
-						return self::encode($response);
+					$param_type = $params[0]->getType();
+					if($param_type){
+						$param_name= $param_type->getName();;
+						$ref_param = new ReflectionClass($param_name);
+						if($ref_param->hasMethod("mergeFromString")){
+							$class = new $class_name();
+							$request = self::decode($param_name,$data);
+							$response = $class->$func_name($request);
+							header("grpc-status: 0");
+							return self::encode($response);
+						}else{
+							header("grpc-message: The {$params[0]} of $class_name::$func_name() type is wrong");
+						}
+					}else{
+						header("grpc-message: The {$params[0]} of $class_name::$func_name() type have not defined");
 					}
+				}else{
+					header("grpc-message: The Parameter of $class_name::$func_name() is empty");
 				}
 			}catch(ReflectionException $e){
 				header("grpc-message: ".$e->getMessage());
