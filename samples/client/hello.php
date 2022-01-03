@@ -18,12 +18,11 @@ try{
 	$client = new Test\Helloworld\GreeterClient(null,null,$channel);
 	$request = new Test\Helloworld\HelloRequest();
 	$request->setName("Tony");
-	list($reply,$error) = $client->SayHello($request)->wait();
+	$call = $client->SayHello($request);
+	list($reply,$status) = $call->wait();
+	echo __FILE__.":".__LINE__.":"; print_r($call->getMetadata());
 	if($reply){
 		echo __FILE__.":".__LINE__.":"; var_dump($reply->getMessage());
-	}else{
-		echo __FILE__.":".__LINE__.":"; 
-		print_r($error);
 	}
 
 	$request = new Test\Helloworld\HelloRequest();

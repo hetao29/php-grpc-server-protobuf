@@ -1,5 +1,6 @@
 <?php
 namespace Test\Helloworld;
+class A{}
 class Greeter{
 	/**
 	 */
