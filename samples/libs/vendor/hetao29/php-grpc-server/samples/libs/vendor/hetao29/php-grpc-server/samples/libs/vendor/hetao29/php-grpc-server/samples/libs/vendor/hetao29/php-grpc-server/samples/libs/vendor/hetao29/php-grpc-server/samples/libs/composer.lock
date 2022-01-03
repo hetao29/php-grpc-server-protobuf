@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6d76c5c5144c311a68e605f2c4fb9562",
+    "content-hash": "7d3c7de97b8da9808a5d26e9d50e362b",
     "packages": [
         {
             "name": "google/protobuf",
@@ -109,16 +109,16 @@
         },
         {
             "name": "hetao29/php-grpc-server",
-            "version": "dev-main",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hetao29/php-grpc-server.git",
-                "reference": "7294769315007830c178c896a9bf46d3d9ffa856"
+                "reference": "2fc30d01e9a28cefbfa231bc988d870f35880f81"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hetao29/php-grpc-server/zipball/7294769315007830c178c896a9bf46d3d9ffa856",
-                "reference": "7294769315007830c178c896a9bf46d3d9ffa856",
+                "url": "https://api.github.com/repos/hetao29/php-grpc-server/zipball/2fc30d01e9a28cefbfa231bc988d870f35880f81",
+                "reference": "2fc30d01e9a28cefbfa231bc988d870f35880f81",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -131,7 +131,6 @@
                 "google/protobuf": "^3.7",
                 "grpc/grpc": "^1.10.0"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "files": [
@@ -161,17 +160,15 @@
             ],
             "support": {
                 "issues": "https://github.com/hetao29/php-grpc-server/issues",
-                "source": "https://github.com/hetao29/php-grpc-server/tree/main"
+                "source": "https://github.com/hetao29/php-grpc-server/tree/1.0.0"
             },
-            "time": "2022-01-02T11:32:30+00:00"
+            "time": "2022-01-02T11:57:16+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "hetao29/php-grpc-server": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

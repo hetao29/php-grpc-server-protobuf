@@ -56,17 +56,17 @@
         },
         {
             "name": "grpc/grpc",
-            "version": "1.12.0",
-            "version_normalized": "1.12.0.0",
+            "version": "1.42.0",
+            "version_normalized": "1.42.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/grpc/grpc-php.git",
-                "reference": "ad3f6a2bb47475a32a7cdf23da3f67957e0e5aab"
+                "reference": "9fa44f104cb92e924d4da547323a97f3d8aca6d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/grpc/grpc-php/zipball/ad3f6a2bb47475a32a7cdf23da3f67957e0e5aab",
-                "reference": "ad3f6a2bb47475a32a7cdf23da3f67957e0e5aab",
+                "url": "https://api.github.com/repos/grpc/grpc-php/zipball/9fa44f104cb92e924d4da547323a97f3d8aca6d4",
+                "reference": "9fa44f104cb92e924d4da547323a97f3d8aca6d4",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -76,16 +76,16 @@
                 ]
             },
             "require": {
-                "php": ">=5.5.0"
+                "php": ">=7.0.0"
             },
             "require-dev": {
-                "google/auth": "v0.9"
+                "google/auth": "^v1.3.0"
             },
             "suggest": {
                 "ext-protobuf": "For better performance, install the protobuf C extension.",
                 "google/protobuf": "To get started using grpc quickly, install the native protobuf library."
             },
-            "time": "2018-05-15T22:09:16+00:00",
+            "time": "2021-11-19T08:13:51+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -103,9 +103,70 @@
                 "rpc"
             ],
             "support": {
-                "source": "https://github.com/grpc/grpc-php/tree/v1.12.0"
+                "source": "https://github.com/grpc/grpc-php/tree/v1.42.0"
             },
             "install-path": "../grpc/grpc"
+        },
+        {
+            "name": "hetao29/php-grpc-server",
+            "version": "dev-main",
+            "version_normalized": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hetao29/php-grpc-server.git",
+                "reference": "7294769315007830c178c896a9bf46d3d9ffa856"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hetao29/php-grpc-server/zipball/7294769315007830c178c896a9bf46d3d9ffa856",
+                "reference": "7294769315007830c178c896a9bf46d3d9ffa856",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "google/protobuf": "^3.7",
+                "grpc/grpc": "^1.10.0"
+            },
+            "time": "2022-01-02T11:32:30+00:00",
+            "default-branch": true,
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "files": [
+                    "GRpcServer.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "hetao",
+                    "email": "hetao@hetao.name",
+                    "homepage": "https://github.com/hetao29"
+                }
+            ],
+            "description": "The php grpc server framework with protobuf and DO NOT use any 3rd libraries.",
+            "homepage": "https://github.com/hetao29/php-grpc-server",
+            "keywords": [
+                "gRPC",
+                "nginx",
+                "php",
+                "php-fpm",
+                "protobuf",
+                "server"
+            ],
+            "support": {
+                "issues": "https://github.com/hetao29/php-grpc-server/issues",
+                "source": "https://github.com/hetao29/php-grpc-server/tree/main"
+            },
+            "install-path": "../hetao29/php-grpc-server"
         }
     ],
     "dev": true,
