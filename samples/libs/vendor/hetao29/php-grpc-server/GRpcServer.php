@@ -18,72 +18,71 @@
  */
 use Google\Protobuf\Internal\Message;
 if(!class_exists("GRpcServer",false)):
-final class GRpcServer{
+	final class GRpcServer{
 
-	/**
-	 * main method!
-	 *
-	 * @return false | binary str
-	 */
-	public static function run(){
-		$data = self::getRawData();
-		$uri = $_SERVER['REQUEST_URI'] ?? "";
-		$class = dirname($uri);
-		$class = str_replace("/","",$class);
-		$class = str_replace(".","\\",$class);
-		$func = basename($uri);
-		if(class_exists($class)){
-			$a = new $class();
-			if(method_exists($a,$func)){
-				$r = $a->$func($data);
-				header("grpc-status: 0");
-				header('content-type: application/grpc+proto');
-				return self::encode($r);
+		/**
+		 * main method!
+		 *
+		 * @return false | binary str
+		 */
+		public static function run(){
+			$data = self::getRawData();
+			$uri = $_SERVER['REQUEST_URI'] ?? "";
+			$class_name = str_replace(["/","."],["","\\"],dirname($uri));
+			$func_name = basename($uri);
+			header('content-type: application/grpc+proto');
+			try{
+				$ref = new ReflectionClass($class_name);
+				$params = $ref->getMethod($func_name)->getParameters();
+				if($params){
+					$param_name= $params[0]->getType()->getName();;
+					$ref_param = new ReflectionClass($param_name);
+					if($ref_param->hasMethod("mergeFromString")){
+						$class = new $class_name();
+						$request = self::decode($param_name,$data);
+						$response = $class->$func_name($request);
+						header("grpc-status: 0");
+						return self::encode($response);
+					}
+				}
+			}catch(ReflectionException $e){
+				header("grpc-message: ".$e->getMessage());
+			}
+			header("grpc-status: 2");
+			header('HTTP/1.1 502 Internal Server Error');
+			return false;
+		}
+
+		public static function getRawData(){
+			$data=null;
+			if(isset($GLOBALS['HTTP_RAW_POST_DATA'])){
+				$data = $GLOBALS['HTTP_RAW_POST_DATA'];
 			}else{
-				header("grpc-status: 2");
-				header("grpc-message: the method $func of $class not exits");
-				header("HTTP/1.0 401 Not Found");
+				$data = file_get_contents("php://input");
+			}
+			return $data;
+		}
+
+		//https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
+		public static function encode($obj){
+			$out= $obj->serializeToString();
+			return pack("CN", 0, strlen($out)) . $out;
+		}
+
+		public static function decode($className, string $body){
+			if(empty($body)){
 				return false;
 			}
-		}else{
-			header("grpc-status: 2");
-			header("grpc-message: the class $class not found");
-			header("HTTP/1.0 402 Not Found");
-			return false;
+			$array = unpack("Cflag/Nlength", $body);
+
+			if($array==false){
+				return false;
+			}
+			$message = substr($body, 5, $array['length']);
+
+			$obj = new $className();
+			$obj->mergeFromString($message);
+			return $obj;
 		}
 	}
-
-	public static function getRawData(){
-		$data=null;
-		if(isset($GLOBALS['HTTP_RAW_POST_DATA'])){
-			$data = $GLOBALS['HTTP_RAW_POST_DATA'];
-		}else{
-			$data = file_get_contents("php://input");
-		}
-		return $data;
-	}
-
-	//https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
-
-    public static function encode($obj){
-		$out= $obj->serializeToString();
-		return pack("CN", 0, strlen($out)) . $out;
-    }
-
-    public static function decode($className, string $body){
-		if(empty($body)){
-			return false;
-		}
-		$array = unpack("Cflag/Nlength", $body);
-
-		if($array==false){
-			return false;
-		}
-		$message = substr($body, 5, $array['length']);
-
-		$obj = new $className();
-		$obj->mergeFromString($message);
-		return $obj;
-	}
-}
 endif;

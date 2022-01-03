@@ -1,0 +1,22 @@
+{
+	"name": "hetao29/php-grpc-server",
+	"description": "The php grpc server framework with protobuf and DO NOT use any 3rd libraries.",
+	"keywords": ["php", "grpc", "server", "protobuf", "php-fpm", "nginx"],
+	"homepage": "https://github.com/hetao29/php-grpc-server",
+	"type": "library",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "hetao",
+			"email": "hetao@hetao.name",
+			"homepage": "https://github.com/hetao29"
+		}
+	],
+	"require": {
+		"google/protobuf": "^3.7",
+		"grpc/grpc": "^1.10.0"
+	},
+	"autoload":{
+		"files":["GRpcServer.php"]
+	}
+}

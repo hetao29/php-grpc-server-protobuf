@@ -10,7 +10,7 @@ gRPC Client  => nginx => php-fpm => this framework => custom services
 1. install with composer
 
 ```bash
-composer require "hetao29/php-grpc-server:1.0.2"
+composer require "hetao29/php-grpc-server:1.1.0"
 ```
 
 2. use in php file, like samples/www/index.php
