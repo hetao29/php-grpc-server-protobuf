@@ -10,9 +10,12 @@ spl_autoload_register(function($class){
 });
 try{
 	//call by grpc
-	$client = new Test\Helloworld\GreeterClient("127.0.0.1:50000",[
-		'credentials' => Grpc\ChannelCredentials::createInsecure()
+	//https://grpc.github.io/grpc/php/class_grpc_1_1_channel.html
+	$channel = new Grpc\Channel("127.0.0.1:50000",[
+		//'credentials' => Grpc\ChannelCredentials::createInsecure(),
+		//"force_new"=>false,
 	]);
+	$client = new Test\Helloworld\GreeterClient(null,null,$channel);
 	$request = new Test\Helloworld\HelloRequest();
 	$request->setName("Tony");
 	list($reply,$error) = $client->SayHello($request)->wait();
