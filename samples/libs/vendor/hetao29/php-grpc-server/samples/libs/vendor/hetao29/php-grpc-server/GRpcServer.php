@@ -1,7 +1,7 @@
 <?php
 /*{{{LICENSE
 +-----------------------------------------------------------------------+
-| SlightPHP Framework                                                   |
+|                             Php Grpc Server                           |
 +-----------------------------------------------------------------------+
 | This program is free software; you can redistribute it and/or modify  |
 | it under the terms of the GNU General Public License as published by  |
@@ -10,7 +10,7 @@
 | http://www.gnu.org/licenses/.                                         |
 | Copyright (C) 2008-2009. All Rights Reserved.                         |
 +-----------------------------------------------------------------------+
-| Supports: http://www.slightphp.com                                    |
+| Supports: https://github.com/hetao29/php-grpc-server                  |
 +-----------------------------------------------------------------------+
 }}}*/
 /**
@@ -19,34 +19,12 @@
 use Google\Protobuf\Internal\Message;
 if(!class_exists("GRpcServer",false)):
 final class GRpcServer{
-	/**
-	 * @var string
-	 */
-	public static $appDir=".";
 
-	/**
-	 * @var string
-	 */
-	public static function setAppDir($dir){
-		self::$appDir = $dir;
-		return true;
-	}
-
-	/**
-	 * appDir get
-	 * 
-	 * @return string
-	 */
-	public static function getAppDir(){
-		return self::$appDir;
-	}
 	/**
 	 * main method!
 	 *
-	 * @param string $path
-	 * @return boolean
+	 * @return false | binary str
 	 */
-
 	public static function run(){
 		$data = self::getRawData();
 		$uri = $_SERVER['REQUEST_URI'] ?? "";
@@ -58,16 +36,20 @@ final class GRpcServer{
 			$a = new $class();
 			if(method_exists($a,$func)){
 				$r = $a->$func($data);
+				header("grpc-status: 0");
 				header('content-type: application/grpc');
-				return self::serializeMessage($r);
+				return self::encode($r);
 			}else{
 				header("HTTP/1.0 401 Not Found");
+				return false;
 			}
 		}else{
 			header("HTTP/1.0 402 Not Found");
+			return false;
 		}
 	}
-	public static function getRawData($json_decode=false){
+
+	public static function getRawData(){
 		$data=null;
 		if(isset($GLOBALS['HTTP_RAW_POST_DATA'])){
 			$data = $GLOBALS['HTTP_RAW_POST_DATA'];
@@ -77,75 +59,25 @@ final class GRpcServer{
 		return $data;
 	}
 
-    public static function pack(string $data): string{
-        return $data = pack('CN', 0, strlen($data)) . $data;
+    public static function encode($obj){
+		$out= $obj->serializeToString();
+		return pack("CN", 0, strlen($out)) . $out;
     }
 
-    public static function unpack(string $data): string{
-        // it's the way to verify the package length
-        // 1 + 4 + data
-        // $len = unpack('N', substr($data, 1, 4))[1];
-        // assert(strlen($data) - 5 === $len);
-        return $data = substr($data, 5);
-    }
+    public static function decode($className, string $body){
+		if(empty($body)){
+			return false;
+		}
+		$array = unpack("Cflag/Nlength", $body);
 
-    public static function serializeMessage($data)
-    {
-        if (method_exists($data, 'encode')) {
-            $data = $data->encode();
-        } elseif (method_exists($data, 'serializeToString')) {
-            $data = $data->serializeToString();
-        } else {
-            /** @noinspection PhpUndefinedMethodInspection */
-            $data = $data->serialize();
-        }
-        return self::pack($data);
-    }
+		if($array==false){
+			return false;
+		}
+		$message = substr($body, 5, $array['length']);
 
-    public static function deserializeMessage($deserialize, string $value)
-    {
-        if (empty($value)) {
-            return null;
-        } else {
-            $value = self::unpack($value);
-        }
-        if (is_array($deserialize)) {
-            [$className, $deserializeFunc] = $deserialize;
-            /** @var $obj \Google\Protobuf\Internal\Message */
-            $obj = new $className();
-            if ($deserializeFunc && method_exists($obj, $deserializeFunc)) {
-                $obj->$deserializeFunc($value);
-            } else {
-                /** @noinspection PhpUndefinedMethodInspection */
-                $obj->mergeFromString($value);
-            }
-            return $obj;
-        }
-
-        return call_user_func($deserialize, $value);
-    }
-
-    /**
-     * @param \Swoole\Http2\Response|null $response
-     * @param $deserialize
-     * @return Message[]|\Grpc\StringifyAble[]|\Swoole\Http2\Response[]
-     */
-    public static function parseToResultArray($response, $deserialize): array
-    {
-        if (!$response) {
-            return ['No response', GRPC_ERROR_NO_RESPONSE, $response];
-        } elseif ($response->statusCode !== 0 && (($response->statusCode / 100) % 10) !== 2) {
-            return ['Http status Error', $response->errCode ?: $response->statusCode, $response];
-        } else {
-            $grpc_status = (int) ($response->headers['grpc-status'] ?? 0);
-            if ($grpc_status !== 0) {
-                return [$response->headers['grpc-message'] ?? 'Unknown error', $grpc_status, $response];
-            }
-            $data = $response->data;
-            $reply = self::deserializeMessage($deserialize, $data);
-            $status = (int) (($response->headers['grpc-status'] ?? 0) ?: 0);
-            return [$reply, $status, $response];
-        }
-    }
+		$obj = new $className();
+		$obj->mergeFromString($message);
+		return $obj;
+	}
 }
 endif;

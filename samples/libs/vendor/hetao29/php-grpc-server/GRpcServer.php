@@ -37,13 +37,17 @@ final class GRpcServer{
 			if(method_exists($a,$func)){
 				$r = $a->$func($data);
 				header("grpc-status: 0");
-				header('content-type: application/grpc');
+				header('content-type: application/grpc+proto');
 				return self::encode($r);
 			}else{
+				header("grpc-status: 2");
+				header("grpc-message: the method $func of $class not exits");
 				header("HTTP/1.0 401 Not Found");
 				return false;
 			}
 		}else{
+			header("grpc-status: 2");
+			header("grpc-message: the class $class not found");
 			header("HTTP/1.0 402 Not Found");
 			return false;
 		}
@@ -58,6 +62,8 @@ final class GRpcServer{
 		}
 		return $data;
 	}
+
+	//https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
 
     public static function encode($obj){
 		$out= $obj->serializeToString();
