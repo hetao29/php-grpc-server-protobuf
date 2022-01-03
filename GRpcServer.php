@@ -43,8 +43,13 @@ if(!class_exists("GRpcServer",false)):
 							$class = new $class_name();
 							$request = self::decode($param_name,$data);
 							$response = $class->$func_name($request);
-							header("grpc-status: 0");
-							return self::encode($response);
+							if(method_exists($response,"serializeToString")){
+								header("grpc-status: 0");
+								return self::encode($response);
+							}else{
+								$type = gettype($response);
+								header("grpc-message: The Return value type $type of $class_name::$func_name() is wrong");
+							}
 						}else{
 							header("grpc-message: The {$params[0]} of $class_name::$func_name() type is wrong");
 						}
