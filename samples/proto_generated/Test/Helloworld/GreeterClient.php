@@ -33,6 +33,20 @@ class GreeterClient extends \Grpc\BaseStub {
     }
 
     /**
+     *
+     * @param \Test\Helloworld\PBEmpty $argument input argument
+     * @param array $metadata metadata
+     * @param array $options call options
+     */
+    public function NoOp(\Test\Helloworld\PBEmpty $argument,
+      $metadata = [], $options = []) {
+        return $this->_simpleRequest('/Test.Helloworld.Greeter/NoOp',
+        $argument,
+        ['\Test\Helloworld\PBEmpty', 'decode'],
+        $metadata, $options);
+    }
+
+    /**
      * Sends a greeting
      * @param \Test\Helloworld\HelloRequest $argument input argument
      * @param array $metadata metadata
@@ -43,6 +57,33 @@ class GreeterClient extends \Grpc\BaseStub {
         return $this->_simpleRequest('/Test.Helloworld.Greeter/SayHello',
         $argument,
         ['\Test\Helloworld\HelloReply', 'decode'],
+        $metadata, $options);
+    }
+
+    /**
+     * Sends back abort status.
+     * @param \Test\Helloworld\HelloRequest $argument input argument
+     * @param array $metadata metadata
+     * @param array $options call options
+     */
+    public function EchoAbort(\Test\Helloworld\HelloRequest $argument,
+      $metadata = [], $options = []) {
+        return $this->_simpleRequest('/Test.Helloworld.Greeter/EchoAbort',
+        $argument,
+        ['\Test\Helloworld\HelloReply', 'decode'],
+        $metadata, $options);
+    }
+
+    /**
+     * @param \Test\Helloworld\ServerStreamingEchoRequest $argument input argument
+     * @param array $metadata metadata
+     * @param array $options call options
+     */
+    public function ServerStreamingEcho(\Test\Helloworld\ServerStreamingEchoRequest $argument,
+      $metadata = [], $options = []) {
+        return $this->_serverStreamRequest('/Test.Helloworld.Greeter/ServerStreamingEcho',
+        $argument,
+        ['\Test\Helloworld\ServerStreamingEchoResponse', 'decode'],
         $metadata, $options);
     }
 
