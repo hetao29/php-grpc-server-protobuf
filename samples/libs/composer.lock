@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "11064bfa20c4ccc337c5c9b2e8364d4b",
+    "content-hash": "4f66125bc0186194c1ab4bfb07261b56",
     "packages": [
         {
             "name": "google/protobuf",
@@ -108,17 +108,17 @@
             "time": "2021-11-19T08:13:51+00:00"
         },
         {
-            "name": "hetao29/php-grpc-server",
-            "version": "1.1.2",
+            "name": "hetao29/php-grpc-server-protobuf",
+            "version": "1.1.4",
             "source": {
                 "type": "git",
-                "url": "https://github.com/hetao29/php-grpc-server.git",
-                "reference": "9ee2e0d8c31d727f5953260f63f33eebadf4f8c0"
+                "url": "https://github.com/hetao29/php-grpc-server-protobuf.git",
+                "reference": "b403cab9413d56c8fed500f18f14ef3c52f76454"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hetao29/php-grpc-server/zipball/9ee2e0d8c31d727f5953260f63f33eebadf4f8c0",
-                "reference": "9ee2e0d8c31d727f5953260f63f33eebadf4f8c0",
+                "url": "https://api.github.com/repos/hetao29/php-grpc-server-protobuf/zipball/b403cab9413d56c8fed500f18f14ef3c52f76454",
+                "reference": "b403cab9413d56c8fed500f18f14ef3c52f76454",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -149,7 +149,7 @@
                 }
             ],
             "description": "The php grpc server framework with protobuf and DO NOT use any 3rd libraries.",
-            "homepage": "https://github.com/hetao29/php-grpc-server",
+            "homepage": "https://github.com/hetao29/php-grpc-server-protobuf",
             "keywords": [
                 "gRPC",
                 "nginx",
@@ -159,10 +159,10 @@
                 "server"
             ],
             "support": {
-                "issues": "https://github.com/hetao29/php-grpc-server/issues",
-                "source": "https://github.com/hetao29/php-grpc-server/tree/1.1.2"
+                "issues": "https://github.com/hetao29/php-grpc-server-protobuf/issues",
+                "source": "https://github.com/hetao29/php-grpc-server-protobuf/tree/1.1.4"
             },
-            "time": "2022-01-03T12:20:06+00:00"
+            "time": "2022-01-04T08:15:20+00:00"
         }
     ],
     "packages-dev": [],
