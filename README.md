@@ -1,4 +1,4 @@
-# php-grpc-server
+# php-grpc-server-protobuf
 The php grpc server framework with protobuf and DO NOT use any 3rd libraries.
 
 # Architecture
@@ -10,7 +10,7 @@ gRPC Client  => nginx => php-fpm => this framework => custom services
 1. install with composer
 
 ```bash
-composer require "hetao29/php-grpc-server:1.1.2"
+composer require "hetao29/php-grpc-server-protobuf:1.1.3"
 ```
 
 2. use in php file, like samples/www/index.php

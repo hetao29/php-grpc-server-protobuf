@@ -10,7 +10,7 @@
 | http://www.gnu.org/licenses/.                                         |
 | Copyright (C) 2008-2009. All Rights Reserved.                         |
 +-----------------------------------------------------------------------+
-| Supports: https://github.com/hetao29/php-grpc-server                  |
+| Supports: https://github.com/hetao29/php-grpc-server-protobuf         |
 +-----------------------------------------------------------------------+
 }}}*/
 /**
