@@ -96,6 +96,11 @@ server {
 ```
 4. test
 
+
 ```bash
 php client/hello.php
+```
+
+```bash
+curl -d '{"name":"xx"}' -v http://127.0.0.1:50000//Test.Helloworld.Greeter/SayHello -H "content-type:application/json"
 ```
