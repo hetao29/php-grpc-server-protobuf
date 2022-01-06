@@ -1,5 +1,6 @@
 # php-grpc-server-protobuf
 The php grpc server framework with protobuf and DO NOT use any 3rd libraries or use Swoole.
+Support protobuf and json request.
 
 # Architecture
 
