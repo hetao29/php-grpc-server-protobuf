@@ -11,7 +11,11 @@ spl_autoload_register(function($class){
 try{
 	//call by grpc
 	//https://grpc.github.io/grpc/php/class_grpc_1_1_channel.html
+	#swoole
 	//curl -d '{"name":"xx"}' -v http://127.0.0.1:50000//Test.Helloworld.Greeter/SayHello -H "content-type:application/json"
+
+	#nginx + php-fpm
+	//curl -d '{"name":"xx"}' -v http://127.0.0.1:50010//Test.Helloworld.Greeter/SayHello -H "content-type:application/json"
 	$channel = new Grpc\Channel("127.0.0.1:50000",[
 		//'credentials' => Grpc\ChannelCredentials::createInsecure(),
 		//"force_new"=>false,
