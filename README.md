@@ -98,9 +98,12 @@ server {
 
 
 ```bash
+# cli mode
 php client/hello.php
-```
 
-```bash
+# curl command
 curl -d '{"name":"xx"}' -v http://127.0.0.1:50000//Test.Helloworld.Greeter/SayHello -H "content-type:application/json"
+
+# or web browser 
+
 ```
