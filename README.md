@@ -164,8 +164,11 @@ server {
 # cli mode
 php client/hello.php
 
-# curl command
+# curl command (json request)
+# swoole (50000 port)
 curl -d '{"name":"xx"}' -v http://127.0.0.1:50000//Test.Helloworld.Greeter/SayHello -H "content-type:application/json"
+# nginx php-fpm (50010 port)
+curl -d '{"name":"xx"}' -v http://127.0.0.1:50010//Test.Helloworld.Greeter/SayHello -H "content-type:application/json"
 
 # or web browser 
 
