@@ -3,13 +3,15 @@ The php grpc server framework with protobuf and DO NOT use any 3rd libraries or 
 
 # Architecture
 
-## mode with nginx & php-fpm (only support php client)
+## mode with nginx & php-fpm (only support php client and http json request)
 
-gRPC Client  => nginx => php-fpm => this framework => custom services
+1. gRPC Client  => nginx => php-fpm => this framework => custom services => protobuf binary response
+2. http/https json request (content-type:application/json) => nginx => php-fpm => this framework => custom services => json response
 
-## mode with swoole (recommend)
+## mode with swoole (all gRPC Client and http json request)
 
-gRPC Client  => Swoole => this framework => custom services
+1. gRPC Client  => Swoole => this framework => custom services => protobuf binary response
+2. http/https json request (content-type:application/json)  => Swoole => this framework => custom services => json response
 
 # Usage
 
