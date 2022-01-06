@@ -146,7 +146,8 @@ class Greeter{
 
 ```conf
 server {
-	listen 50000 http2;
+	listen 50010 http2; #with http2 is grpc protocol
+	#listen 50010; #without http2 is json protocol
 	root /data/server/;
 	location / {
 		if (!-e $request_filename){
