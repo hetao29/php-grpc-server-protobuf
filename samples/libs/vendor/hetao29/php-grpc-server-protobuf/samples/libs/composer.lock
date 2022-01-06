@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4f66125bc0186194c1ab4bfb07261b56",
+    "content-hash": "ee33b08aa4be9686c46bf993149824c1",
     "packages": [
         {
             "name": "google/protobuf",
-            "version": "v3.19.1",
+            "version": "v3.19.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/protocolbuffers/protobuf-php.git",
-                "reference": "83fe8edf7469ffdd83cb4b4e62249c154f961b9b"
+                "reference": "41bbcce0910b74167789b65ab7dea349f0589a93"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/protocolbuffers/protobuf-php/zipball/83fe8edf7469ffdd83cb4b4e62249c154f961b9b",
-                "reference": "83fe8edf7469ffdd83cb4b4e62249c154f961b9b",
+                "url": "https://api.github.com/repos/protocolbuffers/protobuf-php/zipball/41bbcce0910b74167789b65ab7dea349f0589a93",
+                "reference": "41bbcce0910b74167789b65ab7dea349f0589a93",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -53,9 +53,9 @@
             ],
             "support": {
                 "issues": "https://github.com/protocolbuffers/protobuf-php/issues",
-                "source": "https://github.com/protocolbuffers/protobuf-php/tree/v3.19.1"
+                "source": "https://github.com/protocolbuffers/protobuf-php/tree/v3.19.2"
             },
-            "time": "2021-10-29T00:36:13+00:00"
+            "time": "2022-01-05T23:39:47+00:00"
         },
         {
             "name": "grpc/grpc",
@@ -109,16 +109,16 @@
         },
         {
             "name": "hetao29/php-grpc-server-protobuf",
-            "version": "1.1.4",
+            "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hetao29/php-grpc-server-protobuf.git",
-                "reference": "b403cab9413d56c8fed500f18f14ef3c52f76454"
+                "reference": "80785e130168da52ee7fd1c9a7ebb465fea5c93e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hetao29/php-grpc-server-protobuf/zipball/b403cab9413d56c8fed500f18f14ef3c52f76454",
-                "reference": "b403cab9413d56c8fed500f18f14ef3c52f76454",
+                "url": "https://api.github.com/repos/hetao29/php-grpc-server-protobuf/zipball/80785e130168da52ee7fd1c9a7ebb465fea5c93e",
+                "reference": "80785e130168da52ee7fd1c9a7ebb465fea5c93e",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -128,9 +128,11 @@
                 ]
             },
             "require": {
+                "ext-swoole": "*",
                 "google/protobuf": "^3.7",
                 "grpc/grpc": "^1.10.0"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "files": [
@@ -160,18 +162,22 @@
             ],
             "support": {
                 "issues": "https://github.com/hetao29/php-grpc-server-protobuf/issues",
-                "source": "https://github.com/hetao29/php-grpc-server-protobuf/tree/1.1.4"
+                "source": "https://github.com/hetao29/php-grpc-server-protobuf/tree/main"
             },
-            "time": "2022-01-04T08:15:20+00:00"
+            "time": "2022-01-06T00:56:47+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "hetao29/php-grpc-server-protobuf": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "ext-swoole": "*"
+    },
     "platform-dev": [],
     "plugin-api-version": "2.1.0"
 }
