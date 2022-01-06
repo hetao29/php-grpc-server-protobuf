@@ -22,13 +22,13 @@ Support protobuf and json request.
 composer require "hetao29/php-grpc-server-protobuf:dev-main"
 ```
 
-2. use in php file, like samples/www/index.php (php-fpm mode), or see samples/server/server.php (swoole mode)
+2. use in php file, like samples/www/index.php (php-fpm mode)
 
 ```php
 <?php
-define("ROOT",						dirname(__FILE__)."/../");
-define("ROOT_LIBS",					ROOT."/libs");
-define("ROOT_APP",					ROOT."/app");
+define("ROOT",				dirname(__FILE__)."/../");
+define("ROOT_LIBS",			ROOT."/libs");
+define("ROOT_APP",			ROOT."/app");
 define("ROOT_PROTO_GENERATED",		ROOT."/proto_generated");
 require_once(ROOT_LIBS."/vendor/autoload.php");
 spl_autoload_register(function($class){
@@ -48,6 +48,68 @@ if(($r=GRpcServer::run())!==false){
 	echo($r);
 }
 ```
+
+3. or swoole server
+
+```php
+<?php
+require __DIR__ . '/../libs/vendor/autoload.php';
+
+define("ROOT",				__DIR__."/../");
+define("ROOT_APP",			__DIR__."/../app");
+define("ROOT_PROTO_GENERATED",		__DIR__."/../proto_generated/");
+spl_autoload_register(function($class){
+	$root = ROOT_PROTO_GENERATED."/".str_replace("\\","/",$class).".php";
+	if(is_file($root)){
+		require_once($root);
+	}
+});
+spl_autoload_register(function($class){
+	$root = ROOT_APP."/".str_replace("\\","/",$class).".php";
+	if(is_file($root)){
+		require_once($root);
+	}
+});
+
+
+$http = new Swoole\Http\Server('0.0.0.0', 50000, SWOOLE_BASE);
+
+$http->on('request', function (Swoole\Http\Request $request, Swoole\Http\Response $response) use ($http) {
+	$content_type = (isset($request->header['content-type']) && $request->header['content-type']=='application/json') ? 'json' : null; //json | null (default)
+	if($content_type=="json"){
+		$response->header('content-type', 'application/json');
+	}else{
+		$response->header('content-type', 'application/grpc');
+	}
+	try{
+		if(($r=GRpcServer::run($request->server['request_uri'], $request->rawContent(), $content_type))!==false){
+			//echo($r);
+			$response->header('trailer', 'grpc-status, grpc-message');
+			$trailer = [
+				"grpc-status" => "0",
+				"grpc-message" => ""
+			];
+			foreach ($trailer as $trailer_name => $trailer_value) {
+				$response->trailer($trailer_name, $trailer_value);
+			}
+			$response->end($r);
+	}
+	}catch(Exception $e){
+		$response->header('trailer', 'grpc-status, grpc-message');
+		$trailer = [
+			"grpc-status" => $e->getCode(),
+			"grpc-message" => $e->getMessage(),
+		];
+		foreach ($trailer as $trailer_name => $trailer_value) {
+			$response->trailer($trailer_name, $trailer_value);
+		}
+		$response->end();
+	}
+});
+$http->start();
+
+```
+
 
 # Write App Services 
 
