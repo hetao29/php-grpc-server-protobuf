@@ -44,8 +44,13 @@ spl_autoload_register(function($class){
 	}
 });
 
-if(($r=GRpcServer::run())!==false){
-	echo($r);
+try{
+	$content_type = (isset($_SERVER['HTTP_CONTENT_TYPE']) && $_SERVER['HTTP_CONTENT_TYPE']=='application/json') ? 'json' : null; //json | null (default)
+	if(($r=GRpcServer::run(null,null,$content_type))!==false){
+		echo($r);
+	}
+}catch(Exception $e){
+	print_r($e);
 }
 ```
 
