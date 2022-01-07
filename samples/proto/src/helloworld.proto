@@ -19,7 +19,6 @@ package Test.Helloworld;
 // The greeting service definition.
 service Greeter {
 	//
-	rpc NoOp(Empty) returns (Empty);
 	// Sends a greeting
 	rpc SayHello (HelloRequest) returns (HelloReply);
 
@@ -28,8 +27,6 @@ service Greeter {
 
 	rpc ServerStreamingEcho(ServerStreamingEchoRequest) returns (stream ServerStreamingEchoResponse);
 }
-
-message Empty {}
 
 // The request message containing the user's name.
 message HelloRequest {

@@ -1,7 +1,7 @@
 all:
 	#https://grpc.io/docs/languages/php/quickstart/
 	#生成interface
-	protoc --plugin=protoc-gen-php-grpc=proto/protoc-gen-php-grpc --php-grpc_out=proto_generated --php_out=proto_generated -I proto/ proto/src/*
+	protoc --plugin=protoc-gen-php-grpc=proto/php-grpc-server-protobuf-plugin --php-grpc_out=proto_generated --php_out=proto_generated -I proto/ proto/src/*
 	#生成client
 	protoc --plugin=protoc-gen-grpc=proto/grpc_php_plugin --grpc_out=proto_generated --php_out=proto_generated -I proto/ proto/src/*
 install:
