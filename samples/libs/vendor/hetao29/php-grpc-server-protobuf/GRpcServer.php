@@ -23,9 +23,10 @@ final class GRpcServer{
 	 * @param string $uri = null
 	 * @param string $data = null
 	 * @param string $content_type = null | json
+	 * @param string $grpc_encoding = null | gzip
 	 * @return false | binary str
 	 */
-	public static function run($uri = null, $data = null, $content_type=null){
+	public static function run($uri = null, $data = null, $content_type=null, $grpc_encoding=null){
 		$data = $data ?? self::getRawData();
 		$uri = $uri ?? $_SERVER['REQUEST_URI'] ?? "";
 		$class_name = str_replace(["/","."],["","\\"],dirname($uri));
@@ -41,7 +42,7 @@ final class GRpcServer{
 					$ref_param = new ReflectionClass($param_name);
 					if($ref_param->hasMethod("mergeFromString")){
 						$class = new $class_name();
-						$request = self::decode($param_name,$data,$content_type);
+						$request = self::decode($param_name,$data,$content_type,$grpc_encoding);
 						$response = $class->$func_name($request);
 						if(method_exists($response,"serializeToString")){
 							return self::encode($response, $content_type);
@@ -89,7 +90,7 @@ final class GRpcServer{
 		}
 	}
 
-	public static function decode($className, string $body, string $content_type=null){
+	public static function decode($className, string $body, string $content_type=null, string $grpc_encoding=null){
 		if(empty($body)){
 			return false;
 		}
@@ -103,6 +104,9 @@ final class GRpcServer{
 				return false;
 			}
 			$message = substr($body, 5, $array['length']);
+			if($grpc_encoding=="gzip"){
+				$message = gzdecode($message);
+			}
 			$obj->mergeFromString($message);
 		}
 		return $obj;

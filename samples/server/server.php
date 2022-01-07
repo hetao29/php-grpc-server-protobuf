@@ -51,14 +51,14 @@ $http->set([
 //});
 $http->on('request', function (Swoole\Http\Request $request, Swoole\Http\Response $response) use ($http) {
 	$content_type = (isset($request->header['content-type']) && $request->header['content-type']=='application/json') ? 'json' : null; //json | null (default)
+	$grpc_encoding = $request->header['grpc-encoding'] ?? null; //gzip | null (default)
 	if($content_type=="json"){
 		$response->header('content-type', 'application/json');
 	}else{
 		$response->header('content-type', 'application/grpc');
 	}
 	try{
-		if(($r=GRpcServer::run($request->server['request_uri'], $request->rawContent(), $content_type))!==false){
-			//echo($r);
+		if(($r=GRpcServer::run($request->server['request_uri'], $request->rawContent(), $content_type, $grpc_encoding))!==false){
 			$response->header('trailer', 'grpc-status, grpc-message');
 			$trailer = [
 				"grpc-status" => "0",
@@ -70,6 +70,7 @@ $http->on('request', function (Swoole\Http\Request $request, Swoole\Http\Respons
 			$response->end($r);
 	}
 	}catch(Exception $e){
+		print_r($e);
 		$response->header('trailer', 'grpc-status, grpc-message');
 		$trailer = [
 			"grpc-status" => $e->getCode(),
