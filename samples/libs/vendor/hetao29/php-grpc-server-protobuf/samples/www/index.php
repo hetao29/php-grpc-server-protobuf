@@ -1,5 +1,4 @@
 <?php
-ob_start();
 define("ROOT",						dirname(__FILE__)."/../");
 define("ROOT_LIBS",					ROOT."/libs");
 define("ROOT_APP",					ROOT."/app");
@@ -19,8 +18,10 @@ spl_autoload_register(function($class){
 });
 
 try{
-	if(($r=GRpcServer::run())!==false){
+	$content_type = (isset($_SERVER['HTTP_CONTENT_TYPE']) && $_SERVER['HTTP_CONTENT_TYPE']=='application/json') ? 'json' : null; //json | null (default)
+	if(($r=GRpcServer::run(null,null,$content_type))!==false){
 		echo($r);
 	}
 }catch(Exception $e){
+	print_r($e);
 }

@@ -2,17 +2,17 @@
     "packages": [
         {
             "name": "google/protobuf",
-            "version": "v3.19.1",
-            "version_normalized": "3.19.1.0",
+            "version": "v3.19.2",
+            "version_normalized": "3.19.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/protocolbuffers/protobuf-php.git",
-                "reference": "83fe8edf7469ffdd83cb4b4e62249c154f961b9b"
+                "reference": "41bbcce0910b74167789b65ab7dea349f0589a93"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/protocolbuffers/protobuf-php/zipball/83fe8edf7469ffdd83cb4b4e62249c154f961b9b",
-                "reference": "83fe8edf7469ffdd83cb4b4e62249c154f961b9b",
+                "url": "https://api.github.com/repos/protocolbuffers/protobuf-php/zipball/41bbcce0910b74167789b65ab7dea349f0589a93",
+                "reference": "41bbcce0910b74167789b65ab7dea349f0589a93",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -30,7 +30,7 @@
             "suggest": {
                 "ext-bcmath": "Need to support JSON deserialization"
             },
-            "time": "2021-10-29T00:36:13+00:00",
+            "time": "2022-01-05T23:39:47+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -50,7 +50,7 @@
             ],
             "support": {
                 "issues": "https://github.com/protocolbuffers/protobuf-php/issues",
-                "source": "https://github.com/protocolbuffers/protobuf-php/tree/v3.19.1"
+                "source": "https://github.com/protocolbuffers/protobuf-php/tree/v3.19.2"
             },
             "install-path": "../google/protobuf"
         },
@@ -109,17 +109,17 @@
         },
         {
             "name": "hetao29/php-grpc-server-protobuf",
-            "version": "1.1.4",
-            "version_normalized": "1.1.4.0",
+            "version": "dev-main",
+            "version_normalized": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hetao29/php-grpc-server-protobuf.git",
-                "reference": "b403cab9413d56c8fed500f18f14ef3c52f76454"
+                "reference": "80785e130168da52ee7fd1c9a7ebb465fea5c93e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hetao29/php-grpc-server-protobuf/zipball/b403cab9413d56c8fed500f18f14ef3c52f76454",
-                "reference": "b403cab9413d56c8fed500f18f14ef3c52f76454",
+                "url": "https://api.github.com/repos/hetao29/php-grpc-server-protobuf/zipball/80785e130168da52ee7fd1c9a7ebb465fea5c93e",
+                "reference": "80785e130168da52ee7fd1c9a7ebb465fea5c93e",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -129,10 +129,12 @@
                 ]
             },
             "require": {
+                "ext-swoole": "*",
                 "google/protobuf": "^3.7",
                 "grpc/grpc": "^1.10.0"
             },
-            "time": "2022-01-04T08:15:20+00:00",
+            "time": "2022-01-06T00:56:47+00:00",
+            "default-branch": true,
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -163,7 +165,7 @@
             ],
             "support": {
                 "issues": "https://github.com/hetao29/php-grpc-server-protobuf/issues",
-                "source": "https://github.com/hetao29/php-grpc-server-protobuf/tree/1.1.4"
+                "source": "https://github.com/hetao29/php-grpc-server-protobuf/tree/main"
             },
             "install-path": "../hetao29/php-grpc-server-protobuf"
         }

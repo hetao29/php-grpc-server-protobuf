@@ -16,6 +16,8 @@
 /**
  * @package GRpcServer
  */
+interface GRpcServerInterface{
+}
 final class GRpcServer{
 
 	/**
@@ -24,6 +26,7 @@ final class GRpcServer{
 	 * @param string $data = null
 	 * @param string $content_type = null | json
 	 * @param string $grpc_encoding = null | gzip
+	 * @param ...$args //service construct params
 	 * @return false | binary str
 	 */
 	public static function run($uri = null, $data = null, $content_type=null, $grpc_encoding=null){
@@ -34,37 +37,30 @@ final class GRpcServer{
 		$code=0;$msg="";
 		try{
 			$ref = new ReflectionClass($class_name);
-			$params = $ref->getMethod($func_name)->getParameters();
-			if($params){
-				$param_type = $params[0]->getType();
-				if($param_type){
-					$param_name= $param_type->getName();;
-					$ref_param = new ReflectionClass($param_name);
-					if($ref_param->hasMethod("mergeFromString")){
-						$class = new $class_name();
+			if($ref->implementsInterface("{$class_name}Interface")){
+				$params = $ref->getMethod($func_name)->getParameters();
+				if($params){
+					$param_type = $params[0]->getType();
+					if($param_type){
+						$param_name= $param_type->getName();;
+						$class = $ref->newInstanceArgs(array_slice(func_get_args(),4));
 						$request = self::decode($param_name,$data,$content_type,$grpc_encoding);
 						$response = $class->$func_name($request);
-						if(method_exists($response,"serializeToString")){
-							return self::encode($response, $content_type);
-						}else{
-							$type = gettype($response);
-							$code = -1;
-							$msg = "grpc-message: The Return value type $type of $class_name::$func_name() is wrong";
-						}
+						return self::encode($response, $content_type);
 					}else{
-						$code = -2;
-						$msg = "grpc-message: The {$params[0]} of $class_name::$func_name() type is wrong";
+						$code = -1;
+						$msg = "grpc-message: The {$params[0]} of $class_name::$func_name() type have not defined";
 					}
 				}else{
-					$code = -3;
-					$msg = "grpc-message: The {$params[0]} of $class_name::$func_name() type have not defined";
+					$code = -2;
+					$msg = "grpc-message: The Parameter of $class_name::$func_name() is empty";
 				}
 			}else{
-				$code = -4;
-				$msg = "grpc-message: The Parameter of $class_name::$func_name() is empty";
+				$code = -3;
+				$msg = "grpc-message: The Class of $class_name is not implements {$class_name}Interface";
 			}
 		}catch(Exception $e){
-			$code = -5;
+			$code = -4;
 			$msg = "grpc-message: ".$e->getMessage();
 		}
 		throw new Exception($msg,$code);

@@ -113,12 +113,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hetao29/php-grpc-server-protobuf.git",
-                "reference": "ac6484b76dad7e36f0aa82d121904a6a51c729b8"
+                "reference": "3b2a762fb6e83f4d8524d19b14378004aae61309"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hetao29/php-grpc-server-protobuf/zipball/ac6484b76dad7e36f0aa82d121904a6a51c729b8",
-                "reference": "ac6484b76dad7e36f0aa82d121904a6a51c729b8",
+                "url": "https://api.github.com/repos/hetao29/php-grpc-server-protobuf/zipball/3b2a762fb6e83f4d8524d19b14378004aae61309",
+                "reference": "3b2a762fb6e83f4d8524d19b14378004aae61309",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -165,7 +165,7 @@
                 "issues": "https://github.com/hetao29/php-grpc-server-protobuf/issues",
                 "source": "https://github.com/hetao29/php-grpc-server-protobuf/tree/main"
             },
-            "time": "2022-01-06T08:31:12+00:00"
+            "time": "2022-01-09T14:42:19+00:00"
         }
     ],
     "packages-dev": [],
@@ -180,5 +180,5 @@
         "ext-swoole": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.2.0"
 }
