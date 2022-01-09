@@ -24,6 +24,7 @@ final class GRpcServer{
 	 * @param string $data = null
 	 * @param string $content_type = null | json
 	 * @param string $grpc_encoding = null | gzip
+	 * @param ...$args //service construct params
 	 * @return false | binary str
 	 */
 	public static function run($uri = null, $data = null, $content_type=null, $grpc_encoding=null){
@@ -41,7 +42,7 @@ final class GRpcServer{
 					$param_name= $param_type->getName();;
 					$ref_param = new ReflectionClass($param_name);
 					if($ref_param->hasMethod("mergeFromString")){
-						$class = new $class_name();
+						$class = new $class_name(...array_slice(func_get_args(),4));
 						$request = self::decode($param_name,$data,$content_type,$grpc_encoding);
 						$response = $class->$func_name($request);
 						if(method_exists($response,"serializeToString")){
