@@ -5,7 +5,7 @@
 namespace User\Info;
 
 
-interface InfoInterface
+interface InfoInterface extends \GRpcServerInterface
 {
     // GRPC specific service name.
     public const NAME = "User.Info.Info";
