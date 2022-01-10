@@ -96,7 +96,7 @@ final class GRpcServer{
 		}
 		$obj = new $className();
 		if($content_type=="json"){
-			$obj->mergeFromJsonString($body);
+			$obj->mergeFromJsonString($body, $ignore_unknown=true);
 			return $obj;
 		}else{
 			$array = unpack("Cflag/Nlength", $body);
