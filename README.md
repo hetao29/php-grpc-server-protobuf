@@ -129,13 +129,12 @@ cd proto && make
 ```php
 <?php
 namespace Test\Helloworld;
-class Greeter{
+class Greeter implements GreeterInterface{
 	/**
-	 * @return HelloReply
 	 */
 	public function SayHello(HelloRequest $request) : HelloReply{
 		$reply = new HelloReply();
-		$reply->setMessage("Hello, ".$request->getName()."!");
+		$reply->setMessage("Hello2, ".$request->getName()."!");
 		return $reply;
 	}
 }
