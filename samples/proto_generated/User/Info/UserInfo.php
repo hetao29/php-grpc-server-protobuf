@@ -16,11 +16,11 @@ class UserInfo extends \Google\Protobuf\Internal\Message
     /**
      * Generated from protobuf field <code>int64 Uid = 1;</code>
      */
-    private $Uid = 0;
+    protected $Uid = 0;
     /**
      * Generated from protobuf field <code>string Name = 2;</code>
      */
-    private $Name = '';
+    protected $Name = '';
 
     /**
      * Constructor.

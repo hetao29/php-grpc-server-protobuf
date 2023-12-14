@@ -20,21 +20,21 @@ class ServerStreamingEchoRequest extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string message = 1;</code>
      */
-    private $message = '';
+    protected $message = '';
     /**
      * The total number of messages to be generated before the server
      * closes the stream; default is 10.
      *
      * Generated from protobuf field <code>int32 message_count = 2;</code>
      */
-    private $message_count = 0;
+    protected $message_count = 0;
     /**
      * The interval (ms) between two server messages. The server implementation
      * may enforce some minimum interval (e.g. 100ms) to avoid message overflow.
      *
      * Generated from protobuf field <code>int32 message_interval = 3;</code>
      */
-    private $message_interval = 0;
+    protected $message_interval = 0;
 
     /**
      * Constructor.

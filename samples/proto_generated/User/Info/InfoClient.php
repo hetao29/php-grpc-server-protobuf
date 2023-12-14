@@ -22,6 +22,7 @@ class InfoClient extends \Grpc\BaseStub {
      * @param \User\Info\LoginRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
+     * @return \Grpc\UnaryCall
      */
     public function login(\User\Info\LoginRequest $argument,
       $metadata = [], $options = []) {
@@ -35,6 +36,7 @@ class InfoClient extends \Grpc\BaseStub {
      * @param \User\Info\LogoutRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
+     * @return \Grpc\UnaryCall
      */
     public function logout(\User\Info\LogoutRequest $argument,
       $metadata = [], $options = []) {

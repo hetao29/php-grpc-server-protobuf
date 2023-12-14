@@ -38,6 +38,7 @@ class GreeterClient extends \Grpc\BaseStub {
      * @param \Test\Helloworld\HelloRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
+     * @return \Grpc\UnaryCall
      */
     public function SayHello(\Test\Helloworld\HelloRequest $argument,
       $metadata = [], $options = []) {
@@ -52,6 +53,7 @@ class GreeterClient extends \Grpc\BaseStub {
      * @param \Test\Helloworld\HelloRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
+     * @return \Grpc\UnaryCall
      */
     public function EchoAbort(\Test\Helloworld\HelloRequest $argument,
       $metadata = [], $options = []) {
@@ -65,6 +67,7 @@ class GreeterClient extends \Grpc\BaseStub {
      * @param \Test\Helloworld\ServerStreamingEchoRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
+     * @return \Grpc\ServerStreamingCall
      */
     public function ServerStreamingEcho(\Test\Helloworld\ServerStreamingEchoRequest $argument,
       $metadata = [], $options = []) {

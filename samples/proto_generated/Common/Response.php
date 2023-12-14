@@ -16,11 +16,11 @@ class Response extends \Google\Protobuf\Internal\Message
     /**
      * Generated from protobuf field <code>int32 code = 1;</code>
      */
-    private $code = 0;
+    protected $code = 0;
     /**
      * Generated from protobuf field <code>string msg = 2;</code>
      */
-    private $msg = '';
+    protected $msg = '';
 
     /**
      * Constructor.

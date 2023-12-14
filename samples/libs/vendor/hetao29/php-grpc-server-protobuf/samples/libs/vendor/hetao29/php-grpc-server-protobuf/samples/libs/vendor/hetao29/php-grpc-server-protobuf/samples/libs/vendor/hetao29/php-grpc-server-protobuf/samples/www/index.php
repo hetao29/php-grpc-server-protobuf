@@ -18,7 +18,9 @@ spl_autoload_register(function($class){
 	}
 });
 
-if(($r=GRpcServer::run())!==false){
-	echo($r);
+try{
+	if(($r=GRpcServer::run())!==false){
+		echo($r);
+	}
+}catch(Exception $e){
 }
-$a = ob_get_contents();

@@ -24,7 +24,19 @@ try{
 	if($reply){
 		echo __FILE__.":".__LINE__.":"; var_dump($reply->getMessage());
 	}
+	print_r($status);
+	exit;
 
+	$client = new User\Info\InfoClient(null,null,$channel);
+	$request = new User\Info\LoginRequest();
+	$request->setName("Tony");
+	$call = $client->login($request);
+	list($reply,$status) = $call->wait();
+	echo __FILE__.":".__LINE__.":"; print_r($call->getMetadata());
+	if($reply){
+		echo __FILE__.":".__LINE__.":"; var_dump($reply->getInfo());
+	}
+	exit;
 	$request = new Test\Helloworld\HelloRequest();
 	$request->setName("TonyAbort");
 	list($reply,$error) = $client->EchoAbort($request)->wait();

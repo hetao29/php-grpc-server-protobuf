@@ -5,13 +5,14 @@
 namespace User\Info;
 
 
-interface InfoInterface extends \GRpcServerInterface
+interface InfoInterface
 {
     // GRPC specific service name.
     public const NAME = "User.Info.Info";
 
     /**
-    * @param LoginRequest $request
+    * @param GRPC\ContextInterface $ctx
+    * @param LoginRequest $in
     * @return LoginResponse
     *
     * @throws \Exception
@@ -19,7 +20,8 @@ interface InfoInterface extends \GRpcServerInterface
     public function login(LoginRequest $request): LoginResponse;
 
     /**
-    * @param LogoutRequest $request
+    * @param GRPC\ContextInterface $ctx
+    * @param LogoutRequest $in
     * @return LogoutResponse
     *
     * @throws \Exception

@@ -5,13 +5,14 @@
 namespace Test\Helloworld;
 
 
-interface GreeterInterface extends \GRpcServerInterface
+interface GreeterInterface
 {
     // GRPC specific service name.
     public const NAME = "Test.Helloworld.Greeter";
 
     /**
-    * @param HelloRequest $request
+    * @param GRPC\ContextInterface $ctx
+    * @param HelloRequest $in
     * @return HelloReply
     *
     * @throws \Exception
@@ -19,7 +20,8 @@ interface GreeterInterface extends \GRpcServerInterface
     public function SayHello(HelloRequest $request): HelloReply;
 
     /**
-    * @param HelloRequest $request
+    * @param GRPC\ContextInterface $ctx
+    * @param HelloRequest $in
     * @return HelloReply
     *
     * @throws \Exception
@@ -27,7 +29,8 @@ interface GreeterInterface extends \GRpcServerInterface
     public function EchoAbort(HelloRequest $request): HelloReply;
 
     /**
-    * @param ServerStreamingEchoRequest $request
+    * @param GRPC\ContextInterface $ctx
+    * @param ServerStreamingEchoRequest $in
     * @return ServerStreamingEchoResponse
     *
     * @throws \Exception

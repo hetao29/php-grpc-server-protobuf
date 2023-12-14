@@ -16,19 +16,19 @@ class LoginRequest extends \Google\Protobuf\Internal\Message
     /**
      * Generated from protobuf field <code>.common.Error error = 1;</code>
      */
-    private $error = null;
+    protected $error = null;
     /**
      * Generated from protobuf field <code>string name = 2;</code>
      */
-    private $name = '';
+    protected $name = '';
     /**
      * Generated from protobuf field <code>string password = 3;</code>
      */
-    private $password = '';
+    protected $password = '';
     /**
      * Generated from protobuf field <code>string verify_code = 4;</code>
      */
-    private $verify_code = '';
+    protected $verify_code = '';
 
     /**
      * Constructor.
@@ -49,11 +49,21 @@ class LoginRequest extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.common.Error error = 1;</code>
-     * @return \Common\Error
+     * @return \Common\Error|null
      */
     public function getError()
     {
         return $this->error;
+    }
+
+    public function hasError()
+    {
+        return isset($this->error);
+    }
+
+    public function clearError()
+    {
+        unset($this->error);
     }
 
     /**

@@ -16,11 +16,11 @@ class LoginResponse extends \Google\Protobuf\Internal\Message
     /**
      * Generated from protobuf field <code>.common.Error error = 1;</code>
      */
-    private $error = null;
+    protected $error = null;
     /**
      * Generated from protobuf field <code>.User.Info.UserInfo info = 2;</code>
      */
-    private $info = null;
+    protected $info = null;
 
     /**
      * Constructor.
@@ -39,11 +39,21 @@ class LoginResponse extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.common.Error error = 1;</code>
-     * @return \Common\Error
+     * @return \Common\Error|null
      */
     public function getError()
     {
         return $this->error;
+    }
+
+    public function hasError()
+    {
+        return isset($this->error);
+    }
+
+    public function clearError()
+    {
+        unset($this->error);
     }
 
     /**
@@ -61,11 +71,21 @@ class LoginResponse extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.User.Info.UserInfo info = 2;</code>
-     * @return \User\Info\UserInfo
+     * @return \User\Info\UserInfo|null
      */
     public function getInfo()
     {
         return $this->info;
+    }
+
+    public function hasInfo()
+    {
+        return isset($this->info);
+    }
+
+    public function clearInfo()
+    {
+        unset($this->info);
     }
 
     /**

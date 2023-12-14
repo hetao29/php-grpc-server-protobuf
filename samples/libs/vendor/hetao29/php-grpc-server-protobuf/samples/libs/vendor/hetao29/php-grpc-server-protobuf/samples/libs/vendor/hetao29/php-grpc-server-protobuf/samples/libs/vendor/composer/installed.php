@@ -5,7 +5,7 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '80785e130168da52ee7fd1c9a7ebb465fea5c93e',
+        'reference' => 'e27a99edd42e90d0a20e56d2860bd470ff364cec',
         'name' => '__root__',
         'dev' => true,
     ),
@@ -16,7 +16,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '80785e130168da52ee7fd1c9a7ebb465fea5c93e',
+            'reference' => 'e27a99edd42e90d0a20e56d2860bd470ff364cec',
             'dev_requirement' => false,
         ),
         'google/protobuf' => array(
@@ -45,7 +45,7 @@
             'aliases' => array(
                 0 => '9999999-dev',
             ),
-            'reference' => '80785e130168da52ee7fd1c9a7ebb465fea5c93e',
+            'reference' => 'e27a99edd42e90d0a20e56d2860bd470ff364cec',
             'dev_requirement' => false,
         ),
     ),

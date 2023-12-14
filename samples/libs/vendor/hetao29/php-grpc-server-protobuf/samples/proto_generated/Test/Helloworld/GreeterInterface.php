@@ -5,7 +5,7 @@
 namespace Test\Helloworld;
 
 
-interface GreeterInterface
+interface GreeterInterface extends \GRpcServerInterface
 {
     // GRPC specific service name.
     public const NAME = "Test.Helloworld.Greeter";

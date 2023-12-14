@@ -1,19 +1,25 @@
 # php-grpc-server-protobuf
-The php grpc server framework with protobuf and DO NOT use any 3rd libraries.
+The php grpc server framework with protobuf and DO NOT use any 3rd libraries or use Swoole.
 
 # Architecture
 
+## mode with nginx & php-fpm (only support php client)
+
 gRPC Client  => nginx => php-fpm => this framework => custom services
+
+## mode with swoole (recommend)
+
+gRPC Client  => Swoole => this framework => custom services
 
 # Usage
 
 1. install with composer
 
 ```bash
-composer require "hetao29/php-grpc-server-protobuf:1.1.4"
+composer require "hetao29/php-grpc-server-protobuf:dev-main"
 ```
 
-2. use in php file, like samples/www/index.php
+2. use in php file, like samples/www/index.php (php-fpm mode), or see samples/server/server.php (swoole mode)
 
 ```php
 <?php

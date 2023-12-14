@@ -16,7 +16,7 @@ class LogoutResponse extends \Google\Protobuf\Internal\Message
     /**
      * Generated from protobuf field <code>.common.Error error = 1;</code>
      */
-    private $error = null;
+    protected $error = null;
 
     /**
      * Constructor.
@@ -34,11 +34,21 @@ class LogoutResponse extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.common.Error error = 1;</code>
-     * @return \Common\Error
+     * @return \Common\Error|null
      */
     public function getError()
     {
         return $this->error;
+    }
+
+    public function hasError()
+    {
+        return isset($this->error);
+    }
+
+    public function clearError()
+    {
+        unset($this->error);
     }
 
     /**

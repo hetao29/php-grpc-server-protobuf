@@ -114,12 +114,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hetao29/php-grpc-server-protobuf.git",
-                "reference": "ac6484b76dad7e36f0aa82d121904a6a51c729b8"
+                "reference": "3b2a762fb6e83f4d8524d19b14378004aae61309"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hetao29/php-grpc-server-protobuf/zipball/ac6484b76dad7e36f0aa82d121904a6a51c729b8",
-                "reference": "ac6484b76dad7e36f0aa82d121904a6a51c729b8",
+                "url": "https://api.github.com/repos/hetao29/php-grpc-server-protobuf/zipball/3b2a762fb6e83f4d8524d19b14378004aae61309",
+                "reference": "3b2a762fb6e83f4d8524d19b14378004aae61309",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -134,10 +134,10 @@
                 "google/protobuf": "^3.7",
                 "grpc/grpc": "^1.10.0"
             },
-            "time": "2022-01-06T08:31:12+00:00",
+            "time": "2022-01-09T14:42:19+00:00",
             "default-branch": true,
             "type": "library",
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "files": [
                     "GRpcServer.php"

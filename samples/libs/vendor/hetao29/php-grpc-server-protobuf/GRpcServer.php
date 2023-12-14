@@ -43,7 +43,11 @@ final class GRpcServer{
 					$param_type = $params[0]->getType();
 					if($param_type){
 						$param_name= $param_type->getName();;
-						$class = $ref->newInstanceArgs(array_slice(func_get_args(),4));
+						if($ref->getConstructor()){
+							$class = $ref->newInstanceArgs(array_slice(func_get_args(),4));
+						}else{
+							$class = $ref->newInstanceWithoutConstructor();
+						}
 						$request = self::decode($param_name,$data,$content_type,$grpc_encoding);
 						$response = $class->$func_name($request);
 						return self::encode($response, $content_type);
@@ -92,7 +96,7 @@ final class GRpcServer{
 		}
 		$obj = new $className();
 		if($content_type=="json"){
-			$obj->mergeFromJsonString($body);
+			$obj->mergeFromJsonString($body, $ignore_unknown=true);
 			return $obj;
 		}else{
 			$array = unpack("Cflag/Nlength", $body);

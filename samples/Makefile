@@ -1,9 +1,14 @@
+ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 all:
-	#https://grpc.io/docs/languages/php/quickstart/
-	#生成interface
-	protoc --plugin=protoc-gen-php-grpc=proto/php-grpc-server-protobuf-plugin --php-grpc_out=proto_generated --php_out=proto_generated -I proto/ proto/src/*
+	#其它语言的生成，请参考, https://github.com/hetao29/docker-protoc
 	#生成client
-	protoc --plugin=protoc-gen-grpc=proto/grpc_php_plugin --grpc_out=proto_generated --php_out=proto_generated -I proto/ proto/src/*
+	find proto/src/ -name "*.proto" | xargs -I {} sudo docker run --rm -v ${ROOT_DIR}:${ROOT_DIR} -w ${ROOT_DIR} hetao29/docker-protoc:latest protoc \
+		--plugin=protoc-gen-grpc=/usr/bin/grpc_php_plugin --grpc_out=proto_generated --php_out=proto_generated -I proto/ -I . \
+		"{}"
+	#生成服务端interface
+	find proto/src/ -name "*.proto" | xargs -I {} sudo docker run --rm -v ${ROOT_DIR}:${ROOT_DIR} -w ${ROOT_DIR} hetao29/docker-protoc:latest protoc \
+		--plugin=protoc-gen-grpc=/usr/bin/protoc-gen-php-grpc --grpc_out=proto_generated --php_out=proto_generated -I proto/ -I . \
+		"{}"
 install:
 	sudo apt install -y protobuf-compiler
 	sudo pecl install grpc
