@@ -18,6 +18,9 @@
 		"google/protobuf": "*",
 		"grpc/grpc": "*"
 	},
+	"archive":{
+		"exclude":["/samples"]
+	},
 	"autoload":{
 		"files":["GRpcServer.php"]
 	}

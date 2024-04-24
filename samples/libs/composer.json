@@ -1,9 +1,9 @@
 {
 	"require": {
-		"google/protobuf": "~v3.19.1",
-		"grpc/grpc": "~1.42.0",
+		"google/protobuf": "*",
+		"grpc/grpc": "*",
 		"ext-swoole": "*",
-		"hetao29/php-grpc-server-protobuf": "dev-main"
+		"hetao29/php-grpc-server-protobuf": "*"
 	},
 	"repositories": {
 		"packagist": {
