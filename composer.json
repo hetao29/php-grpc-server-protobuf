@@ -15,8 +15,8 @@
 	"require": {
 		"ext-grpc": "*",
 		"ext-swoole": "*",
-		"google/protobuf": "^3.7",
-		"grpc/grpc": "^1.10.0"
+		"google/protobuf": "*",
+		"grpc/grpc": "*"
 	},
 	"autoload":{
 		"files":["GRpcServer.php"]
