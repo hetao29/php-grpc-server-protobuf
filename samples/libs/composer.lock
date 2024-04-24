@@ -4,33 +4,27 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ee33b08aa4be9686c46bf993149824c1",
+    "content-hash": "9725b0d7c4c53a6e28307918c52fe768",
     "packages": [
         {
             "name": "google/protobuf",
-            "version": "v3.19.6",
+            "version": "v4.26.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/protocolbuffers/protobuf-php.git",
-                "reference": "ccc5b4c775222a734b02b24e310fa74ca32e1c9e"
+                "reference": "5c46b0eb09e7ad3e6efef3c5a85e2a34108c52ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/protocolbuffers/protobuf-php/zipball/ccc5b4c775222a734b02b24e310fa74ca32e1c9e",
-                "reference": "ccc5b4c775222a734b02b24e310fa74ca32e1c9e",
-                "shasum": "",
-                "mirrors": [
-                    {
-                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
-                        "preferred": true
-                    }
-                ]
+                "url": "https://api.github.com/repos/protocolbuffers/protobuf-php/zipball/5c46b0eb09e7ad3e6efef3c5a85e2a34108c52ae",
+                "reference": "5c46b0eb09e7ad3e6efef3c5a85e2a34108c52ae",
+                "shasum": ""
             },
             "require": {
-                "php": ">=5.5.0"
+                "php": ">=7.0.0"
             },
             "require-dev": {
-                "phpunit/phpunit": ">=4.8.0"
+                "phpunit/phpunit": ">=5.0.0"
             },
             "suggest": {
                 "ext-bcmath": "Need to support JSON deserialization"
@@ -52,29 +46,23 @@
                 "proto"
             ],
             "support": {
-                "source": "https://github.com/protocolbuffers/protobuf-php/tree/v3.19.6"
+                "source": "https://github.com/protocolbuffers/protobuf-php/tree/v4.26.1"
             },
-            "time": "2022-09-29T20:49:41+00:00"
+            "time": "2024-03-27T19:56:50+00:00"
         },
         {
             "name": "grpc/grpc",
-            "version": "1.42.0",
+            "version": "1.57.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/grpc/grpc-php.git",
-                "reference": "9fa44f104cb92e924d4da547323a97f3d8aca6d4"
+                "reference": "b610c42022ed3a22f831439cb93802f2a4502fdf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/grpc/grpc-php/zipball/9fa44f104cb92e924d4da547323a97f3d8aca6d4",
-                "reference": "9fa44f104cb92e924d4da547323a97f3d8aca6d4",
-                "shasum": "",
-                "mirrors": [
-                    {
-                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
-                        "preferred": true
-                    }
-                ]
+                "url": "https://api.github.com/repos/grpc/grpc-php/zipball/b610c42022ed3a22f831439cb93802f2a4502fdf",
+                "reference": "b610c42022ed3a22f831439cb93802f2a4502fdf",
+                "shasum": ""
             },
             "require": {
                 "php": ">=7.0.0"
@@ -102,37 +90,30 @@
                 "rpc"
             ],
             "support": {
-                "source": "https://github.com/grpc/grpc-php/tree/v1.42.0"
+                "source": "https://github.com/grpc/grpc-php/tree/v1.57.0"
             },
-            "time": "2021-11-19T08:13:51+00:00"
+            "time": "2023-08-14T23:57:54+00:00"
         },
         {
             "name": "hetao29/php-grpc-server-protobuf",
-            "version": "dev-main",
+            "version": "1.7.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hetao29/php-grpc-server-protobuf.git",
-                "reference": "7126b26f5a54e8b78ec333999bb4bd83c6555c61"
+                "reference": "dfbd2948241d741986395fa7a910a24bf0297a7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hetao29/php-grpc-server-protobuf/zipball/7126b26f5a54e8b78ec333999bb4bd83c6555c61",
-                "reference": "7126b26f5a54e8b78ec333999bb4bd83c6555c61",
-                "shasum": "",
-                "mirrors": [
-                    {
-                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
-                        "preferred": true
-                    }
-                ]
+                "url": "https://api.github.com/repos/hetao29/php-grpc-server-protobuf/zipball/dfbd2948241d741986395fa7a910a24bf0297a7d",
+                "reference": "dfbd2948241d741986395fa7a910a24bf0297a7d",
+                "shasum": ""
             },
             "require": {
                 "ext-grpc": "*",
                 "ext-swoole": "*",
-                "google/protobuf": "^3.7",
-                "grpc/grpc": "^1.10.0"
+                "google/protobuf": "*",
+                "grpc/grpc": "*"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "files": [
@@ -162,17 +143,15 @@
             ],
             "support": {
                 "issues": "https://github.com/hetao29/php-grpc-server-protobuf/issues",
-                "source": "https://github.com/hetao29/php-grpc-server-protobuf/tree/main"
+                "source": "https://github.com/hetao29/php-grpc-server-protobuf/tree/1.7.4"
             },
-            "time": "2022-01-11T16:13:20+00:00"
+            "time": "2024-04-24T03:53:45+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "hetao29/php-grpc-server-protobuf": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

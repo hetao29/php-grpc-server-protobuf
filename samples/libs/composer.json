@@ -8,7 +8,7 @@
 	"repositories": {
 		"packagist": {
 			"type": "composer",
-			"url": "https://mirrors.aliyun.com/composer/"
+			"url": "https://packagist.org"
 		}
 	}
 }
