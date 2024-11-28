@@ -90,7 +90,7 @@ final class GRpcServer{
 		}
 	}
 
-	public static function decode($className, string $body, string $content_type=null, string $grpc_encoding=null){
+	public static function decode($className, string $body, $content_type=null, $grpc_encoding=null){
 		if(empty($body)){
 			return false;
 		}
