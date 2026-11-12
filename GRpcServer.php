@@ -19,6 +19,8 @@
 interface GRpcServerInterface{
 }
 final class GRpcServer{
+	// Unary request limit, applied to both wire payload and decoded payload.
+	public const MAX_MESSAGE_LENGTH = 16 * 1024 * 1024;
 
 	/**
 	 * main run method!
@@ -43,12 +45,12 @@ final class GRpcServer{
 					$param_type = $params[0]->getType();
 					if($param_type){
 						$param_name= $param_type->getName();;
+						$request = self::decode($param_name,$data,$content_type,$grpc_encoding);
 						if($ref->getConstructor()){
 							$class = $ref->newInstanceArgs(array_slice(func_get_args(),4));
 						}else{
 							$class = $ref->newInstanceWithoutConstructor();
 						}
-						$request = self::decode($param_name,$data,$content_type,$grpc_encoding);
 						$response = $class->$func_name($request);
 						return self::encode($response, $content_type);
 					}else{
@@ -90,23 +92,58 @@ final class GRpcServer{
 		}
 	}
 
-	public static function decode($className, string $body, $content_type=null, $grpc_encoding=null){
-		if(empty($body)){
-			return false;
+	public static function decode($className, string $body, $content_type=null, $grpc_encoding=null, int $max_message_length=self::MAX_MESSAGE_LENGTH){
+		if($max_message_length < 1){
+			throw new InvalidArgumentException('Invalid message size limit');
 		}
-		$obj = new $className();
 		if($content_type=="json"){
+			$obj = new $className();
 			$obj->mergeFromJsonString($body, $ignore_unknown=true);
 			return $obj;
 		}else{
+			$body_length = strlen($body);
+			if($body_length < 5){
+				throw new UnexpectedValueException('Incomplete gRPC frame header');
+			}
 			$array = unpack("Cflag/Nlength", $body);
-			if($array==false){
-				return false;
+			if($array['flag'] !== 0 && $array['flag'] !== 1){
+				throw new UnexpectedValueException('Invalid gRPC compression flag');
+			}
+			if($array['length'] > $max_message_length){
+				throw new LengthException('gRPC message exceeds size limit');
+			}
+			if($array['length'] !== $body_length - 5){
+				throw new UnexpectedValueException('Expected exactly one complete gRPC message');
 			}
 			$message = substr($body, 5, $array['length']);
-			if($grpc_encoding=="gzip"){
-				$message = gzdecode($message);
+			if($array['flag'] === 1){
+				if($grpc_encoding !== 'gzip'){
+					throw new UnexpectedValueException('Unsupported gRPC compression encoding');
+				}
+				// Decode incrementally: a small wire payload must not allocate an
+				// unbounded decoded string before the size check. Suppress only zlib's
+				// expected malformed-input warnings and reject the failed operation.
+				$inflate = inflate_init(ZLIB_ENCODING_GZIP);
+				$decoded = '';
+				for($offset = 0; $offset < $array['length']; $offset += 1024){
+					$chunk = @inflate_add($inflate, substr($message, $offset, 1024), ZLIB_SYNC_FLUSH);
+					if($chunk === false){
+						throw new UnexpectedValueException('Invalid gzip message');
+					}
+					if(strlen($chunk) > $max_message_length - strlen($decoded)){
+						throw new LengthException('Decoded gRPC message exceeds size limit');
+					}
+					$decoded .= $chunk;
+					if(inflate_get_status($inflate) === ZLIB_STREAM_END){
+						break;
+					}
+				}
+				if(inflate_get_status($inflate) !== ZLIB_STREAM_END || inflate_get_read_len($inflate) !== $array['length']){
+					throw new UnexpectedValueException('Incomplete gzip message or trailing data');
+				}
+				$message = $decoded;
 			}
+			$obj = new $className();
 			$obj->mergeFromString($message);
 		}
 		return $obj;

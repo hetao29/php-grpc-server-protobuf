@@ -178,3 +178,22 @@ curl -d '{"name":"xx"}' -v http://127.0.0.1:50010//Test.Helloworld.Greeter/SayHe
 # or web browser 
 
 ```
+
+# Unary request validation
+
+Binary requests must contain exactly one length-prefixed Protobuf message. The
+decoder rejects incomplete headers, flags other than 0 or 1, truncated payloads,
+and extra bytes or frames. A zero-length message with its five-byte frame header
+is valid; an empty HTTP body is not a binary message.
+
+Flag 0 means uncompressed even when the request advertises `grpc-encoding: gzip`.
+Flag 1 requires `grpc-encoding: gzip`. Gzip is decoded incrementally with size
+checks; truncated streams, checksum failures, concatenated members and trailing
+data are rejected. Streaming RPC requests are not supported by this dispatcher.
+
+`GRpcServer::MAX_MESSAGE_LENGTH` defaults to 16 MiB, excluding the five-byte frame
+header, and bounds both the wire payload and decoded payload. Direct decoder
+callers may pass a positive byte limit as the optional fifth argument to
+`decode()`. JSON decoding retains its existing format and unknown-field behavior.
+Binary framing and decompression are validated before request and service
+construction. Existing `run()` exception wrapping remains unchanged.
