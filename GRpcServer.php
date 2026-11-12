@@ -21,6 +21,17 @@ interface GRpcServerInterface{
 final class GRpcServer{
 	// Unary request limit, applied to both wire payload and decoded payload.
 	public const MAX_MESSAGE_LENGTH = 16 * 1024 * 1024;
+	private static $service_namespaces = [];
+
+	/** Configure trusted dot-separated service namespaces at startup; empty denies all. */
+	public static function setServiceNamespaces(array $namespaces){
+		foreach($namespaces as $namespace){
+			if(!is_string($namespace) || !preg_match('/\A[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*\z/', $namespace)){
+				throw new InvalidArgumentException('Invalid service namespace');
+			}
+		}
+		self::$service_namespaces = array_values($namespaces);
+	}
 
 	/**
 	 * main run method!
@@ -32,44 +43,85 @@ final class GRpcServer{
 	 * @return false | binary str
 	 */
 	public static function run($uri = null, $data = null, $content_type=null, $grpc_encoding=null){
-		$data = $data ?? self::getRawData();
 		$uri = $uri ?? $_SERVER['REQUEST_URI'] ?? "";
-		$class_name = str_replace(["/","."],["","\\"],dirname($uri));
-		$func_name = basename($uri);
-		$code=0;$msg="";
 		try{
-			$ref = new ReflectionClass($class_name);
-			if($ref->implementsInterface("{$class_name}Interface")){
-				$params = $ref->getMethod($func_name)->getParameters();
-				if($params){
-					$param_type = $params[0]->getType();
-					if($param_type){
-						$param_name= $param_type->getName();;
-						$request = self::decode($param_name,$data,$content_type,$grpc_encoding);
-						if($ref->getConstructor()){
-							$class = $ref->newInstanceArgs(array_slice(func_get_args(),4));
-						}else{
-							$class = $ref->newInstanceWithoutConstructor();
-						}
-						$response = $class->$func_name($request);
-						return self::encode($response, $content_type);
-					}else{
-						$code = -1;
-						$msg = "grpc-message: The {$params[0]} of $class_name::$func_name() type have not defined";
-					}
-				}else{
-					$code = -2;
-					$msg = "grpc-message: The Parameter of $class_name::$func_name() is empty";
-				}
-			}else{
-				$code = -3;
-				$msg = "grpc-message: The Class of $class_name is not implements {$class_name}Interface";
+			// Validate before deriving any class name or triggering an autoloader.
+			if(!is_string($uri) || !preg_match('/\A\/([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*)\/([A-Za-z_][A-Za-z0-9_]*)\z/', $uri, $route)){
+				throw new UnexpectedValueException('Invalid RPC route');
 			}
+			$allowed = false;
+			foreach(self::$service_namespaces as $namespace){
+				if($route[1] === $namespace || strncmp($route[1], $namespace.'.', strlen($namespace) + 1) === 0){
+					$allowed = true;
+					break;
+				}
+			}
+			if(!$allowed){
+				throw new UnexpectedValueException('RPC service not allowed');
+			}
+			$class_name = str_replace('.', '\\', $route[1]);
+			$func_name = $route[2];
+			// Load only the declared protocol contract before the implementation.
+			$interface_name = $class_name.'Interface';
+			$interface = new ReflectionClass($interface_name);
+			if(!$interface->isInterface() || $interface->getName() !== $interface_name
+				|| !$interface->hasConstant('NAME') || $interface->getConstant('NAME') !== $route[1]
+				|| !$interface->hasMethod($func_name)){
+				throw new UnexpectedValueException('Invalid RPC interface or method');
+			}
+			$contract = $interface->getMethod($func_name);
+			if($contract->getName() !== $func_name){
+				throw new UnexpectedValueException('Invalid RPC method name');
+			}
+			$types = self::rpcTypes($contract);
+			$ref = new ReflectionClass($class_name);
+			if($ref->getName() !== $class_name || !$ref->isInstantiable() || !$ref->implementsInterface($interface_name)){
+				throw new UnexpectedValueException('Invalid RPC service');
+			}
+			$method = $ref->getMethod($func_name);
+			if($method->getName() !== $func_name || self::rpcTypes($method) !== $types){
+				throw new UnexpectedValueException('RPC implementation does not match interface');
+			}
+			$data = $data ?? self::getRawData();
+			$request = self::decode($types[0], $data, $content_type, $grpc_encoding);
+			if($ref->getConstructor()){
+				$class = $ref->newInstanceArgs(array_slice(func_get_args(),4));
+			}else{
+				$class = $ref->newInstanceWithoutConstructor();
+			}
+			$response = $method->invoke($class, $request);
+			return self::encode($response, $content_type);
 		}catch(Exception $e){
-			$code = -4;
-			$msg = "grpc-message: ".$e->getMessage();
+			throw new Exception('grpc-message: '.$e->getMessage(), -4);
 		}
-		throw new Exception($msg,$code);
+	}
+
+	/** Unary RPC methods accept and return exactly one concrete Protobuf message. */
+	private static function rpcTypes(ReflectionMethod $method){
+		$params = $method->getParameters();
+		if(!$method->isPublic() || $method->isStatic() || strncmp($method->getName(), '__', 2) === 0
+			|| $method->returnsReference() || count($params) !== 1 || $params[0]->isOptional()
+			|| $params[0]->isVariadic() || $params[0]->isPassedByReference()){
+			throw new UnexpectedValueException('Invalid unary RPC signature');
+		}
+		$types = [$params[0]->getType(), $method->getReturnType()];
+		$names = [];
+		foreach($types as $type){
+			if(!$type instanceof ReflectionNamedType || $type->isBuiltin() || $type->allowsNull()
+				|| !is_subclass_of($type->getName(), \Google\Protobuf\Internal\Message::class)){
+				throw new UnexpectedValueException('RPC requires Protobuf message types');
+			}
+			$message = new ReflectionClass($type->getName());
+			if(!$message->isInstantiable()){
+				throw new UnexpectedValueException('Invalid RPC message type');
+			}
+			$names[] = $message->getName();
+		}
+		$constructor = (new ReflectionClass($names[0]))->getConstructor();
+		if($constructor && $constructor->getNumberOfRequiredParameters() !== 0){
+			throw new UnexpectedValueException('RPC request requires constructor arguments');
+		}
+		return $names;
 	}
 
 	public static function getRawData(){

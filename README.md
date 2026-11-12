@@ -31,6 +31,7 @@ define("ROOT_LIBS",			ROOT."/libs");
 define("ROOT_APP",			ROOT."/app");
 define("ROOT_PROTO_GENERATED",		ROOT."/proto_generated");
 require_once(ROOT_LIBS."/vendor/autoload.php");
+GRpcServer::setServiceNamespaces(['Test', 'User']);
 spl_autoload_register(function($class){
 	$root = ROOT_PROTO_GENERATED."/".str_replace("\\","/",$class).".php";
 	if(is_file($root)){
@@ -197,3 +198,24 @@ callers may pass a positive byte limit as the optional fifth argument to
 `decode()`. JSON decoding retains its existing format and unknown-field behavior.
 Binary framing and decompression are validated before request and service
 construction. Existing `run()` exception wrapping remains unchanged.
+
+# RPC route allowlist
+
+From 1.7.8, configure trusted dot-separated service namespaces once at startup,
+before serving requests: `GRpcServer::setServiceNamespaces(['OpenApi']);`. The
+default empty list denies all services. Matching is case-sensitive and includes
+only the exact prefix or its dot-separated descendants, not names such as
+`OpenApiExtra`. Configure test/sample namespaces explicitly only where needed.
+
+Requests must use the exact `/Package.Service/Method` path, with ASCII identifier
+segments and no query, extra slash, percent escape, magic method or backslash.
+The dispatcher checks the path and allowlist before autoloading. It loads the
+same-name Interface first and verifies its `NAME` constant and exact RPC method;
+helper methods absent from that contract cannot trigger implementation loading.
+
+The service must be concrete and implement the exact interface. Both declarations
+must be public, non-static, non-reference unary methods with one required,
+non-nullable, non-variadic Protobuf request and one non-nullable Protobuf response.
+Types must match the protocol contract; a request must support construction with
+no required arguments. Broader PHP parameter types, unions and scalar helpers do
+not define RPC methods. Class, interface and method casing must match exactly.
