@@ -1,6 +1,5 @@
 <?php
 require __DIR__ . '/../libs/vendor/autoload.php';
-\GRpcServer::setServiceNamespaces(['Test', 'User']);
 
 define("ROOT",						__DIR__."/../");
 define("ROOT_APP",					__DIR__."/../app");

@@ -31,7 +31,6 @@ define("ROOT_LIBS",			ROOT."/libs");
 define("ROOT_APP",			ROOT."/app");
 define("ROOT_PROTO_GENERATED",		ROOT."/proto_generated");
 require_once(ROOT_LIBS."/vendor/autoload.php");
-GRpcServer::setServiceNamespaces(['Test', 'User']);
 spl_autoload_register(function($class){
 	$root = ROOT_PROTO_GENERATED."/".str_replace("\\","/",$class).".php";
 	if(is_file($root)){
@@ -199,23 +198,36 @@ callers may pass a positive byte limit as the optional fifth argument to
 Binary framing and decompression are validated before request and service
 construction. Existing `run()` exception wrapping remains unchanged.
 
-# RPC route allowlist
+# RPC routing conventions
 
-From 1.7.8, configure trusted dot-separated service namespaces once at startup,
-before serving requests: `GRpcServer::setServiceNamespaces(['OpenApi']);`. The
-default empty list denies all services. Matching is case-sensitive and includes
-only the exact prefix or its dot-separated descendants, not names such as
-`OpenApiExtra`. Configure test/sample namespaces explicitly only where needed.
+From 1.7.9, dispatch follows the 1.7.7 service/interface convention, with path
+validation and an `is_callable()` check. No namespace allowlist is required.
+The `setServiceNamespaces()` configuration introduced in 1.7.8 has been removed;
+remove those calls when upgrading.
 
 Requests must use the exact `/Package.Service/Method` path, with ASCII identifier
-segments and no query, extra slash, percent escape, magic method or backslash.
-The dispatcher checks the path and allowlist before autoloading. It loads the
-same-name Interface first and verifies its `NAME` constant and exact RPC method;
-helper methods absent from that contract cannot trigger implementation loading.
+segments and no query, extra slash, percent escape or backslash. The path is
+validated before deriving or autoloading the service class. For example,
+`/Example.Greeter/SayHello` resolves to `Example\Greeter::SayHello`, and that
+service must implement `Example\GreeterInterface` by default.
 
-The service must be concrete and implement the exact interface. Both declarations
-must be public, non-static, non-reference unary methods with one required,
-non-nullable, non-variadic Protobuf request and one non-nullable Protobuf response.
-Types must match the protocol contract; a request must support construction with
-no required arguments. Broader PHP parameter types, unions and scalar helpers do
-not define RPC methods. Class, interface and method casing must match exactly.
+The interface suffix can be configured once at startup, before serving requests:
+
+```php
+GRpcServer::setInterfaceSuffix('Contract');
+// Example\Greeter must now implement Example\GreeterContract.
+```
+
+The default is `Interface`. The suffix must be a nonempty ASCII identifier;
+invalid values throw `InvalidArgumentException` without changing the setting.
+This configures the implemented interface name, not the service path or class.
+
+The dispatcher reflects the target method's first parameter type to decode the
+request, constructs the service with arguments from `run()`'s fifth argument
+onward, then checks `is_callable([$service, $method])` before invoking it.
+Private and protected methods without magic-call handling are not callable.
+As in 1.7.7, public helper methods can be dispatched even when absent from the
+interface; `NAME` constants and strict unary method signatures are not checked.
+Treat service classes and their callable methods as RPC entry points under this
+convention. Authentication and authorization remain the service's responsibility.
+The frame validation and gzip limits introduced in 1.7.7 are unchanged.

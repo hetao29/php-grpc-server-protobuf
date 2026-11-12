@@ -4,7 +4,6 @@ define("ROOT_LIBS",					ROOT."/libs");
 define("ROOT_APP",					ROOT."/app");
 define("ROOT_PROTO_GENERATED",		ROOT."/proto_generated");
 require_once(ROOT_LIBS."/vendor/autoload.php");
-\GRpcServer::setServiceNamespaces(['Test', 'User']);
 spl_autoload_register(function($class){
 	$root = ROOT_PROTO_GENERATED."/".str_replace("\\","/",$class).".php";
 	if(is_file($root)){
