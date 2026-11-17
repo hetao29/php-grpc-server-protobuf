@@ -1,30 +1,32 @@
-# php-grpc-server-protobuf 2.0.1
+# php-grpc-server-protobuf 2.0.2
 A Swoole gRPC server and coroutine client with Protobuf and JSON support.
 Binary HTTP/2 supports unary RPCs and all three streaming RPC forms. JSON
 requests use HTTP/1 or HTTP/2 and support unary RPCs.
 
-This checkout is version **2.0.1**, pending publication. See the [Chinese manual](MANUAL.md),
+This checkout is version **2.0.2**. See the [Chinese manual](MANUAL.md),
 [1.x upgrade guide](UPGRADE.md), [changelog](CHANGELOG.md), and
 [runnable examples](samples/README.md). The matching interface generator is
 `php-grpc-server-protobuf-plugin` **2.0.0**.
 
 # Usage
 
-1. after version 2.0.1 is published, install it with Composer
+1. install version 2.0.2 with Composer
 
 ```bash
-composer require "hetao29/php-grpc-server-protobuf:2.0.1"
+composer require "hetao29/php-grpc-server-protobuf:2.0.2"
 ```
 
-The source version declaration does not publish a package or create a Git tag.
-Version 2.0.1 restores large unary responses and preserves error status headers
-through proxies; see the [changelog](CHANGELOG.md). Protocols and generated
+Version 2.0.2 sends binary unary responses with one `end(frame)` after setting
+trailers. This avoids premature HTTP/2 stream closure in older Swoole builds
+when using `write(frame)` followed by an empty `end()`. Large unary responses
+and safe error status headers are preserved; see the [changelog](CHANGELOG.md).
+Streaming responses still require correct streamed-trailer support. Protocols and generated
 interfaces are unchanged, so the interface generator remains version 2.0.0.
 
 The runnable examples currently lock published version 2.0.0 under
-`samples/libs/vendor`. After 2.0.1 is published, update that dependency with
-`composer require "hetao29/php-grpc-server-protobuf:2.0.1"` from `samples/libs`.
-Until then, the examples exercise their locked 2.0.0 package, not this checkout.
+`samples/libs/vendor`. Update that dependency to 2.0.2 with
+`composer require "hetao29/php-grpc-server-protobuf:2.0.2"` from `samples/libs`.
+Before that update, the examples exercise their locked 2.0.0 package, not this checkout.
 Composer installation requires both `ext-swoole` and `ext-grpc`; only
 `client/native.php` uses native grpc for RPC transport. Protobuf's PHP runtime
 is required; its C extension is optional. Streaming requires the patched Swoole
@@ -263,8 +265,10 @@ limits are per message, so streams may transfer more than 16 MiB in total.
 Incoming limits and outgoing checks are independent. A server unary response
 (single message input and output) retains the legacy behavior without a 16 MiB
 outgoing cap. Streaming replies and client sends retain their default cap.
-`GRpcStream::send($message, $enforceSizeLimit = true)` can skip the outgoing check
-for that call only; receive limits and subsequent sends are unchanged. Receiving
-clients must permit the expected response size.
+`GRpcStream::send($message)` always checks `GRpcServer::MAX_MESSAGE_LENGTH`.
+The stream constructor takes only the read callback, write callback and optional
+encoding. `decode($className, $body, $content_type = null, $grpc_encoding = null)`
+uses the same constant for wire and decompressed sizes. Receiving clients must
+permit the expected response size.
 The transport returns stream receive credit as the application consumes bytes.
 Timeouts, cancellation and connection closure wake blocked readers/writers.

@@ -1,12 +1,20 @@
-# 升级到 2.0.1
+# 升级到 2.0.2
 
-当前源码定为 2.0.1，尚未发布 Composer 包或创建 Git 标签。版本详情见 [CHANGELOG.md](CHANGELOG.md)，完整 API 见 [MANUAL.md](MANUAL.md)。
+本文说明升级到 2.0.2 的步骤。版本详情见 [CHANGELOG.md](CHANGELOG.md)，完整 API 见 [MANUAL.md](MANUAL.md)。
+
+## 从 2.0.1 升级
+
+2.0.2 将二进制 unary 响应改为设置最终 trailers 后一次 `end(frame)`，避免旧 Swoole 在 `write(frame)` 后空 `end()` 时提前关闭 HTTP/2 流。典型现象为 Nginx 报 `upstream sent frame for closed stream`，客户端已经收到业务数据但最终为 `RST_STREAM/INTERNAL` 或缺少状态。unary 应用的既有完整 body 请求适配器继续使用，无须为本次响应修复更换 Swoole；真正的流式 RPC 仍须使用正确支持最终 trailers 的扩展。
+
+通过 Composer 升级到 `hetao29/php-grpc-server-protobuf:2.0.2`，同步锁文件、vendor 和实际运行进程。通过 Nginx `grpc_pass` 验证普通 unary、空消息、大于 16 MiB 的 unary 响应以及失败路径，必须读取最终 gRPC 状态。协议、接口、JSON、入站限额和流式默认限额保持不变。
+
+PHP 调用方须移除 `decode()` 的第五个大小参数、`GRpcStream` 构造方法的第四个大小参数和 `send()` 的第二个检查开关。消息限额统一使用 `GRpcServer::MAX_MESSAGE_LENGTH`；流式发送始终检查固定限额，单请求、单响应的 unary 返回仍由 `serve()` 直接 `end(frame)`，不受该出站限额约束。
 
 ## 从 2.0.0 升级
 
 2.0.1 修复两项回归：unary 响应不再受入站 16 MiB 限额约束；二进制异常保留普通安全 gRPC 状态头，避免空 body 经 Nginx grpc_pass 后丢失 trailers 状态。入站线上/解压限额、流式默认限额、协议及服务接口保持不变；`send` 的新增参数为可选，默认行为不变。接口生成器仍为 2.0.0，无协议变更时无需重新生成。
 
-发布后通过 Composer 升级到 `hetao29/php-grpc-server-protobuf:2.0.1`，同步锁文件、vendor 和实际运行进程；验证正常/大体积 unary、超限入站以及经代理的二进制错误头/trailers。只修改版本声明不代表运行进程已切换。
+升级到 2.0.2 时也包含上述修复；同步锁文件、vendor 和实际运行进程，验证正常/大体积 unary、超限入站以及经代理的二进制错误头/trailers。只修改版本声明不代表运行进程已切换。
 
 ## 从 1.x 升级
 
@@ -20,11 +28,11 @@
 
 ### 2. 改用 Composer 加载
 
-2.0.1 发布后，将消费项目约束改为 `hetao29/php-grpc-server-protobuf:2.0.1`，通过 Composer 安装。
+将消费项目约束改为 `hetao29/php-grpc-server-protobuf:2.0.2`，通过 Composer 安装。
 
 移除手写 `spl_autoload_register`、ClassLoader 配置和逐类 require，在业务项目的 Composer `autoload.psr-4` 中声明服务及生成代码，然后运行 `composer dump-autoload`。入口只加载一次 `vendor/autoload.php`；库自身的全局类型由 `autoload.classmap` 按需加载。
 
-仓库示例当前声明和锁文件固定依赖已发布的 2.0.0；2.0.1 发布后通过 Composer 同步升级。库类型由依赖包自身的 Composer 配置加载；示例只配置应用命名空间及公共函数，不配置指向根源码的 classmap。不要在同一进程混载两版全局 `GRpcServer`。
+仓库示例当前声明和锁文件固定依赖已发布的 2.0.0；通过 Composer 同步升级到 2.0.2。库类型由依赖包自身的 Composer 配置加载；示例只配置应用命名空间及公共函数，不配置指向根源码的 classmap。不要在同一进程混载两版全局 `GRpcServer`。
 
 ### 3. 替换服务入口
 

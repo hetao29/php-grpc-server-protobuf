@@ -1,10 +1,10 @@
-# php-grpc-server-protobuf 2.0.1 示例手册
+# php-grpc-server-protobuf 2.0.2 示例手册
 
-本手册随 2.0.1 待发布源码维护；当前示例声明与锁文件仍通过 Composer 固定安装已发布的 `hetao29/php-grpc-server-protobuf:2.0.0`，使用其中的 `GRpcServer / GRpcClient / GRpcStream`，并沿用 `Test.Helloworld.Greeter` 协议。三类流使用同一个服务端，客户端分别放在独立文件中。
+本手册随 2.0.2 维护；当前示例声明与锁文件仍通过 Composer 固定安装已发布的 `hetao29/php-grpc-server-protobuf:2.0.0`，使用其中的 `GRpcServer / GRpcClient / GRpcStream`，并沿用 `Test.Helloworld.Greeter` 协议。三类流使用同一个服务端，客户端分别放在独立文件中。
 
-配套接口生成器版本为 `php-grpc-server-protobuf-plugin 2.0.0`。库 API 见[使用手册](../MANUAL.md)，1.x 接入方式调整见[升级指南](../UPGRADE.md)，版本变化见[变更记录](../CHANGELOG.md)。示例当前使用已发布的 2.0.0 包，不加载仓库根目录的库源码，因而尚未包含源码中的 2.0.1 修复。
+配套接口生成器版本为 `php-grpc-server-protobuf-plugin 2.0.0`。库 API 见[使用手册](../MANUAL.md)，1.x 接入方式调整见[升级指南](../UPGRADE.md)，版本变化见[变更记录](../CHANGELOG.md)。示例当前使用已发布的 2.0.0 包，不加载仓库根目录的库源码，因而尚未包含源码中的 2.0.1、2.0.2 修复。
 
-2.0.1 发布后，在 `samples/libs` 执行 `composer require "hetao29/php-grpc-server-protobuf:2.0.1"`，通过 Composer 同步声明、锁文件和 vendor 后再验证大响应及代理错误路径。接口生成器保持 2.0.0；无协议改动不重新生成。
+在 `samples/libs` 执行 `composer require "hetao29/php-grpc-server-protobuf:2.0.2"`，通过 Composer 同步声明、锁文件和 vendor 后再验证大响应、代理错误路径及 unary 最终 trailers。接口生成器保持 2.0.0；无协议改动不重新生成。
 
 | 调用 | 客户端 | 服务端方法 | 消息方向 |
 | --- | --- | --- | --- |

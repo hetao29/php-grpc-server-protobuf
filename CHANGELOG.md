@@ -1,8 +1,16 @@
 # 变更记录
 
-## 2.0.1（待发布）
+## 2.0.2
 
-当前源码版本为 2.0.1；版本声明和本节说明不代表已发布 Composer 包或创建 Git 标签。此补丁不改变协议和服务接口，继续使用接口生成器 2.0.0。
+本版本修复二进制 unary 响应终止并统一消息限额。RPC 协议与接口生成器保持不变。
+
+- 二进制 unary 响应改为设置最终 trailers 后一次 `end(frame)`，兼容旧 Swoole 的 HTTP/2 响应终止路径，避免 `write(frame)` 加空 `end()` 提前发送 END_STREAM，导致 Nginx 报 `upstream sent frame for closed stream`、客户端收到 RST_STREAM 或缺少最终状态。
+- 保留 unary 出站不设 16 MiB 上限的契约、入站限额、流式发送及 JSON/错误响应行为；无 RPC 协议、生成接口或 Swoole 扩展变更。
+- 消息限额统一使用 `GRpcServer::MAX_MESSAGE_LENGTH`，移除 `decode()` 第五个参数、`GRpcStream` 构造方法的第四个参数及 `send()` 的第二个参数；对应 PHP 调用方须移除这些参数。流式发送始终检查固定限额，unary 响应继续由 `serve()` 直接结束。
+
+## 2.0.1
+
+本版本不改变协议和服务接口，继续使用接口生成器 2.0.0。
 
 - 二进制异常响应同时保留普通 `grpc-status/grpc-message` 头与最终 trailers，避免空 body 经 Nginx grpc_pass 后丢失状态；已发送消息的错误仍以最终 trailers 为准。
 - 修复 unary 响应超过 16 MiB 被错误拒绝的问题；仅跳过单请求、单响应的出站检查，入站线上/解压限额和流式默认限额保持不变。

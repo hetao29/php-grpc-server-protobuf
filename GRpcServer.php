@@ -106,17 +106,23 @@ final class GRpcServer{
                 $response->end($body);
                 return;
             }
+            $body = '';
             if (is_iterable($output)) {
                 foreach ($output as $message) {
                     $stream->send($message);
                 }
             } elseif ($output !== null) {
-                // Preserve unbounded unary responses without relaxing incoming or streaming message limits.
-                $stream->send($output, enforceSizeLimit: $messageClass === GRpcStream::class);
+                if ($messageClass === GRpcStream::class) {
+                    $stream->send($output);
+                } else {
+                    // Finish unary data and trailers together; older Swoole closes write()+end() before trailers.
+                    // Keep unary responses unbounded without relaxing incoming or streaming message limits.
+                    $body = self::encode($output);
+                }
             }
             $response->trailer('grpc-status', '0');
             $response->trailer('grpc-message', '');
-            $response->end();
+            $response->end($body);
         } catch (Throwable $error) {
             // Log the failure category without exposing service data to clients or logs.
             error_log(get_class($error) . ' (' . $error->getCode() . ')');
@@ -170,10 +176,14 @@ final class GRpcServer{
 		}
 	}
 
-	public static function decode($className, string $body, $content_type=null, $grpc_encoding=null, int $max_message_length=self::MAX_MESSAGE_LENGTH){
-		if($max_message_length < 1){
-			throw new InvalidArgumentException('Invalid message size limit');
-		}
+	/**
+	 * @param class-string $className Protobuf message class to instantiate.
+	 * @param string $body Complete gRPC frame or JSON message body.
+	 * @param string|null $content_type Use 'json' for JSON; otherwise decode a binary frame.
+	 * @param string|null $grpc_encoding Incoming compression; compressed frames require 'gzip'.
+	 * @return object Decoded Protobuf message.
+	 */
+	public static function decode($className, string $body, $content_type=null, $grpc_encoding=null){
 		if($content_type=="json"){
 			$obj = new $className();
 			$obj->mergeFromJsonString($body, $ignore_unknown=true);
@@ -187,7 +197,7 @@ final class GRpcServer{
 			if($array['flag'] !== 0 && $array['flag'] !== 1){
 				throw new UnexpectedValueException('Invalid gRPC compression flag');
 			}
-			if($array['length'] > $max_message_length){
+			if($array['length'] > self::MAX_MESSAGE_LENGTH){
 				throw new LengthException('gRPC message exceeds size limit');
 			}
 			if($array['length'] !== $body_length - 5){
@@ -208,7 +218,7 @@ final class GRpcServer{
 					if($chunk === false){
 						throw new UnexpectedValueException('Invalid gzip message');
 					}
-					if(strlen($chunk) > $max_message_length - strlen($decoded)){
+					if(strlen($chunk) > self::MAX_MESSAGE_LENGTH - strlen($decoded)){
 						throw new LengthException('Decoded gRPC message exceeds size limit');
 					}
 					$decoded .= $chunk;

@@ -9,18 +9,12 @@ final class GRpcStream {
      * @param Closure $read Returns the next bytes, '' at EOF, or false on transport failure.
      * @param Closure $write Writes encoded bytes and returns success.
      * @param string|null $encoding Incoming per-message compression.
-     * @param int $maxMessageLength Maximum incoming wire/decoded size and default outgoing message size.
      */
     public function __construct(
         private Closure $read,
         private Closure $write,
-        private ?string $encoding = null,
-        private int $maxMessageLength = GRpcServer::MAX_MESSAGE_LENGTH
-    ) {
-        if ($maxMessageLength < 1) {
-            throw new InvalidArgumentException('Invalid message size limit');
-        }
-    }
+        private ?string $encoding = null
+    ) {}
 
     /** @param string|null $encoding Incoming per-message compression selected by response headers. */
     public function setEncoding(?string $encoding): void {
@@ -42,7 +36,7 @@ final class GRpcStream {
         if ($header['flag'] > 1) {
             throw new UnexpectedValueException('Invalid gRPC compression flag');
         }
-        if ($header['length'] > $this->maxMessageLength) {
+        if ($header['length'] > GRpcServer::MAX_MESSAGE_LENGTH) {
             throw new LengthException('gRPC message exceeds size limit');
         }
         $length = 5 + $header['length'];
@@ -51,16 +45,15 @@ final class GRpcStream {
         }
         $frame = substr($this->buffer, 0, $length);
         $this->buffer = substr($this->buffer, $length);
-        return GRpcServer::decode($class, $frame, null, $this->encoding, $this->maxMessageLength);
+        return GRpcServer::decode($class, $frame, null, $this->encoding);
     }
 
     /**
      * @param object $message Protobuf message to send.
-     * @param bool $enforceSizeLimit Apply the configured limit to this outgoing message; receive limits are unchanged.
      */
-    public function send(object $message, bool $enforceSizeLimit = true): void {
+    public function send(object $message): void {
         $frame = GRpcServer::encode($message);
-        if ($enforceSizeLimit && strlen($frame) - 5 > $this->maxMessageLength) {
+        if (strlen($frame) - 5 > GRpcServer::MAX_MESSAGE_LENGTH) {
             throw new LengthException('gRPC message exceeds size limit');
         }
         if (!(($this->write)($frame))) {
