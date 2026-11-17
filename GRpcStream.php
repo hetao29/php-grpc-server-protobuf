@@ -9,7 +9,7 @@ final class GRpcStream {
      * @param Closure $read Returns the next bytes, '' at EOF, or false on transport failure.
      * @param Closure $write Writes encoded bytes and returns success.
      * @param string|null $encoding Incoming per-message compression.
-     * @param int $maxMessageLength Maximum wire and decoded message size.
+     * @param int $maxMessageLength Maximum incoming wire/decoded size and default outgoing message size.
      */
     public function __construct(
         private Closure $read,
@@ -54,10 +54,13 @@ final class GRpcStream {
         return GRpcServer::decode($class, $frame, null, $this->encoding, $this->maxMessageLength);
     }
 
-    /** @param object $message Protobuf message to send. */
-    public function send(object $message): void {
+    /**
+     * @param object $message Protobuf message to send.
+     * @param bool $enforceSizeLimit Apply the configured limit to this outgoing message; receive limits are unchanged.
+     */
+    public function send(object $message, bool $enforceSizeLimit = true): void {
         $frame = GRpcServer::encode($message);
-        if (strlen($frame) - 5 > $this->maxMessageLength) {
+        if ($enforceSizeLimit && strlen($frame) - 5 > $this->maxMessageLength) {
             throw new LengthException('gRPC message exceeds size limit');
         }
         if (!(($this->write)($frame))) {

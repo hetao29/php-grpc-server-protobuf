@@ -1,22 +1,30 @@
-# php-grpc-server-protobuf 2.0.0
+# php-grpc-server-protobuf 2.0.1
 A Swoole gRPC server and coroutine client with Protobuf and JSON support.
 Binary HTTP/2 supports unary RPCs and all three streaming RPC forms. JSON
 requests use HTTP/1 or HTTP/2 and support unary RPCs.
 
-This checkout is version **2.0.0**. See the [Chinese manual](MANUAL.md),
+This checkout is version **2.0.1**, pending publication. See the [Chinese manual](MANUAL.md),
 [1.x upgrade guide](UPGRADE.md), [changelog](CHANGELOG.md), and
 [runnable examples](samples/README.md). The matching interface generator is
 `php-grpc-server-protobuf-plugin` **2.0.0**.
 
 # Usage
 
-1. install version 2.0.0 with Composer
+1. after version 2.0.1 is published, install it with Composer
 
 ```bash
-composer require "hetao29/php-grpc-server-protobuf:2.0.0"
+composer require "hetao29/php-grpc-server-protobuf:2.0.1"
 ```
 
-The runnable examples install this published package under `samples/libs/vendor`.
+The source version declaration does not publish a package or create a Git tag.
+Version 2.0.1 restores large unary responses and preserves error status headers
+through proxies; see the [changelog](CHANGELOG.md). Protocols and generated
+interfaces are unchanged, so the interface generator remains version 2.0.0.
+
+The runnable examples currently lock published version 2.0.0 under
+`samples/libs/vendor`. After 2.0.1 is published, update that dependency with
+`composer require "hetao29/php-grpc-server-protobuf:2.0.1"` from `samples/libs`.
+Until then, the examples exercise their locked 2.0.0 package, not this checkout.
 Composer installation requires both `ext-swoole` and `ext-grpc`; only
 `client/native.php` uses native grpc for RPC transport. Protobuf's PHP runtime
 is required; its C extension is optional. Streaming requires the patched Swoole
@@ -72,6 +80,10 @@ Only POST is accepted (otherwise HTTP 405). Supported content types are
 HTTP 415); binary requests require HTTP/2 (otherwise HTTP 426). JSON bodies are
 limited to `GRpcServer::MAX_JSON_LENGTH` (2 MiB). Dispatch failures return a safe
 gRPC status 13: HTTP 500 and a JSON error for JSON, final trailers for binary.
+Binary failures also set ordinary `grpc-status` and safe `grpc-message` headers
+when response headers are still writable, so empty-body errors retain their
+status through proxies that discard trailers after `Content-Length: 0`.
+Failures after data has been sent still rely on final trailers.
 Only the exception class and code are logged; messages and service data are not
 returned. Callers must read the final gRPC status even after receiving messages.
 
@@ -248,5 +260,11 @@ and contains HTTP/2 wire header values (binary metadata must be base64 encoded).
 Message framing accepts fragmented/coalesced HTTP/2 DATA and independent gzip
 messages. Wire and decoded messages are each limited to 16 MiB by default;
 limits are per message, so streams may transfer more than 16 MiB in total.
+Incoming limits and outgoing checks are independent. A server unary response
+(single message input and output) retains the legacy behavior without a 16 MiB
+outgoing cap. Streaming replies and client sends retain their default cap.
+`GRpcStream::send($message, $enforceSizeLimit = true)` can skip the outgoing check
+for that call only; receive limits and subsequent sends are unchanged. Receiving
+clients must permit the expected response size.
 The transport returns stream receive credit as the application consumes bytes.
 Timeouts, cancellation and connection closure wake blocked readers/writers.

@@ -111,7 +111,8 @@ final class GRpcServer{
                     $stream->send($message);
                 }
             } elseif ($output !== null) {
-                $stream->send($output);
+                // Preserve unbounded unary responses without relaxing incoming or streaming message limits.
+                $stream->send($output, enforceSizeLimit: $messageClass === GRpcStream::class);
             }
             $response->trailer('grpc-status', '0');
             $response->trailer('grpc-message', '');
@@ -125,6 +126,9 @@ final class GRpcServer{
                     $response->header('grpc-status', '13');
                     $response->end('{"code":13,"message":"Internal server error"}');
                 } else {
+                    // Empty responses may lose trailers through proxies that honor Content-Length: 0.
+                    $response->header('grpc-status', '13');
+                    $response->header('grpc-message', 'Internal server error');
                     $response->trailer('grpc-status', '13');
                     $response->trailer('grpc-message', 'Internal server error');
                     $response->end();
