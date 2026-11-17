@@ -19,8 +19,9 @@
 interface GRpcServerInterface{
 }
 final class GRpcServer{
-	// Unary request limit, applied to both wire payload and decoded payload.
+	// Per-message limit, applied to both wire payload and decoded payload.
 	public const MAX_MESSAGE_LENGTH = 16 * 1024 * 1024;
+	public const MAX_JSON_LENGTH = 2 * 1024 * 1024;
 	private static $interface_suffix = 'Interface';
 
 	/** Set the suffix of the interface each service must implement; default "Interface". */
@@ -32,73 +33,128 @@ final class GRpcServer{
 		return true;
 	}
 
-	/**
-	 * main run method!
-	 * @param string $uri = null
-	 * @param string $data = null
-	 * @param string $content_type = null | json
-	 * @param string $grpc_encoding = null | gzip
-	 * @param ...$args //service construct params
-	 * @return false | binary str
-	 */
-	public static function run($uri = null, $data = null, $content_type=null, $grpc_encoding=null){
-		$uri = $uri ?? $_SERVER['REQUEST_URI'] ?? "";
-		$code=0;$msg="";
-		try{
-			// Validate before deriving any class name or triggering an autoloader.
-			if(!is_string($uri) || !preg_match('/\A\/([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*)\/([A-Za-z_][A-Za-z0-9_]*)\z/', $uri, $route)){
-				throw new UnexpectedValueException('Invalid RPC route');
-			}
-			$class_name = str_replace('.', '\\', $route[1]);
-			$func_name = $route[2];
-			$interface_name = $class_name.self::$interface_suffix;
-			$ref = new ReflectionClass($class_name);
-			if($ref->implementsInterface($interface_name)){
-				$params = $ref->getMethod($func_name)->getParameters();
-				if($params){
-					$param_type = $params[0]->getType();
-					if($param_type){
-						$param_name = $param_type->getName();
-						$data = $data ?? self::getRawData();
-						$request = self::decode($param_name,$data,$content_type,$grpc_encoding);
-						if($ref->getConstructor()){
-							$class = $ref->newInstanceArgs(array_slice(func_get_args(),4));
-						}else{
-							$class = $ref->newInstanceWithoutConstructor();
-						}
-						if(!is_callable([$class, $func_name])){
-							throw new UnexpectedValueException('RPC method is not callable');
-						}
-						$response = $class->$func_name($request);
-						return self::encode($response, $content_type);
-					}else{
-						$code = -1;
-						$msg = "grpc-message: The {$params[0]} of $class_name::$func_name() type have not defined";
-					}
-				}else{
-					$code = -2;
-					$msg = "grpc-message: The Parameter of $class_name::$func_name() is empty";
-				}
-			}else{
-				$code = -3;
-				$msg = "grpc-message: The Class of $class_name is not implements $interface_name";
-			}
-		}catch(Exception $e){
-			$code = -4;
-			$msg = "grpc-message: ".$e->getMessage();
-		}
-		throw new Exception($msg,$code);
-	}
+    /**
+     * Dispatch unary JSON and binary unary/streaming RPCs and finish the response.
+     * HTTP/2 requires http2_stream_mode; JSON remains a single-message contract.
+     * @param Swoole\Http\Request $request Current transport request.
+     * @param Swoole\Http\Response $response Current transport response.
+     * @param mixed ...$args Arguments passed unchanged to the service constructor.
+     */
+    public static function serve(Swoole\Http\Request $request, Swoole\Http\Response $response, ...$args): void {
+        if ($request->getMethod() !== 'POST') {
+            $response->status(405);
+            $response->header('allow', 'POST');
+            $response->end();
+            return;
+        }
+        $mediaType = strtolower(trim(explode(';', $request->header['content-type'] ?? '')[0]));
+        $json = $mediaType === 'application/json';
+        if (!$json && !in_array($mediaType, ['application/grpc', 'application/grpc+proto'], true)) {
+            $response->status(415);
+            $response->end();
+            return;
+        }
+        $http2 = ($request->server['server_protocol'] ?? '') === 'HTTP/2';
+        if (!$json && !$http2) {
+            $response->status(426);
+            $response->end('Use an HTTP/2 gRPC client.');
+            return;
+        }
+        $response->header('content-type', $json ? 'application/json' : 'application/grpc');
+        try {
+            $uri = $request->server['request_uri'] ?? '';
+            // Validate before deriving a class name or triggering an autoloader.
+            if (!preg_match('/\A\/([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*)\/([A-Za-z_][A-Za-z0-9_]*)\z/', $uri, $route)) {
+                throw new UnexpectedValueException('Invalid RPC route');
+            }
+            $ref = new ReflectionClass(str_replace('.', '\\', $route[1]));
+            if (!$ref->implementsInterface($ref->getName() . self::$interface_suffix)) {
+                throw new UnexpectedValueException('RPC service interface missing');
+            }
+            $method = $ref->getMethod($route[2]);
+            $type = ($method->getParameters()[0] ?? null)?->getType();
+            if (!$type instanceof ReflectionNamedType || $type->isBuiltin() || !$method->isPublic() || $method->isStatic()) {
+                throw new UnexpectedValueException('Invalid RPC request type');
+            }
+            $messageClass = $type->getName();
+            $stream = null;
+            if ($json) {
+                if ($messageClass === GRpcStream::class || $method->isGenerator() || (string) $method->getReturnType() === 'iterable') {
+                    throw new UnexpectedValueException('JSON supports unary RPCs only');
+                }
+                $input = self::decode($messageClass, self::readJson($request, $http2), 'json');
+            } else {
+                $stream = new GRpcStream(
+                    fn() => $request->recv(),
+                    fn(string $frame) => $response->write($frame),
+                    $request->header['grpc-encoding'] ?? null
+                );
+                if ($messageClass === GRpcStream::class) {
+                    $input = $stream;
+                } else {
+                    $input = $stream->recv($messageClass);
+                    if ($input === null || $stream->recv($messageClass) !== null) {
+                        throw new UnexpectedValueException('Expected exactly one gRPC request');
+                    }
+                }
+            }
+            $service = $ref->getConstructor() ? $ref->newInstanceArgs($args) : $ref->newInstanceWithoutConstructor();
+            $output = $service->{$route[2]}($input);
+            if ($json) {
+                $body = self::encode($output, 'json');
+                $response->header('grpc-status', '0');
+                $response->end($body);
+                return;
+            }
+            if (is_iterable($output)) {
+                foreach ($output as $message) {
+                    $stream->send($message);
+                }
+            } elseif ($output !== null) {
+                $stream->send($output);
+            }
+            $response->trailer('grpc-status', '0');
+            $response->trailer('grpc-message', '');
+            $response->end();
+        } catch (Throwable $error) {
+            // Log the failure category without exposing service data to clients or logs.
+            error_log(get_class($error) . ' (' . $error->getCode() . ')');
+            if ($response->isWritable()) {
+                if ($json) {
+                    $response->status(500);
+                    $response->header('grpc-status', '13');
+                    $response->end('{"code":13,"message":"Internal server error"}');
+                } else {
+                    $response->trailer('grpc-status', '13');
+                    $response->trailer('grpc-message', 'Internal server error');
+                    $response->end();
+                }
+            }
+        }
+    }
 
-	public static function getRawData(){
-		$data=null;
-		if(isset($GLOBALS['HTTP_RAW_POST_DATA'])){
-			$data = $GLOBALS['HTTP_RAW_POST_DATA'];
-		}else{
-			$data = file_get_contents("php://input");
-		}
-		return $data;
-	}
+    /**
+     * @param Swoole\Http\Request $request Current JSON transport request.
+     * @param bool $http2 Whether to collect incremental HTTP/2 request bytes.
+     * @return string Complete JSON body, limited to MAX_JSON_LENGTH bytes.
+     */
+    private static function readJson(Swoole\Http\Request $request, bool $http2): string {
+        if (!$http2) {
+            $body = $request->rawContent();
+            if ($body === false || strlen($body) > self::MAX_JSON_LENGTH) {
+                throw new LengthException('JSON request closed or exceeds size limit');
+            }
+            return $body;
+        }
+        $body = '';
+        while (($chunk = $request->recv()) !== '') {
+            if ($chunk === false || strlen($chunk) > self::MAX_JSON_LENGTH - strlen($body)) {
+                throw new LengthException('JSON request closed or exceeds size limit');
+            }
+            $body .= $chunk;
+        }
+        return $body;
+    }
 
 	//https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
 	public static function encode($obj, $content_type=null){

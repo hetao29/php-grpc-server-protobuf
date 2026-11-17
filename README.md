@@ -1,127 +1,95 @@
-# php-grpc-server-protobuf
-The php grpc server framework with protobuf and DO NOT use any 3rd libraries or use Swoole.
-Support protobuf and json request.
+# php-grpc-server-protobuf 2.0.0
+A Swoole gRPC server and coroutine client with Protobuf and JSON support.
+Binary HTTP/2 supports unary RPCs and all three streaming RPC forms. JSON
+requests use HTTP/1 or HTTP/2 and support unary RPCs.
 
-# Architecture
-
-## mode with nginx & php-fpm (only support php client and http json request)
-
-1. gRPC Client  => nginx => php-fpm => this framework => custom services => protobuf binary response
-2. http/https json request (content-type:application/json) => nginx => php-fpm => this framework => custom services => json response
-
-## mode with swoole (all gRPC Client and http json request)
-
-1. gRPC Client  => Swoole => this framework => custom services => protobuf binary response
-2. http/https json request (content-type:application/json)  => Swoole => this framework => custom services => json response
+This checkout is version **2.0.0**. See the [Chinese manual](MANUAL.md),
+[1.x upgrade guide](UPGRADE.md), [changelog](CHANGELOG.md), and
+[runnable examples](samples/README.md). The matching interface generator is
+`php-grpc-server-protobuf-plugin` **2.0.0**.
 
 # Usage
 
-1. install with composer
+1. install with Composer after version 2.0.0 has been published
 
 ```bash
-composer require "hetao29/php-grpc-server-protobuf:dev-main"
+composer require "hetao29/php-grpc-server-protobuf:2.0.0"
 ```
 
-2. use in php file, like samples/www/index.php (php-fpm mode)
+Declaring this local version does not publish a package or create a Git tag.
+To run the current checkout, install the dependencies under `samples/libs`
+as described in the examples. Package installation currently requires both
+`ext-swoole` and `ext-grpc`; the checkout examples require native `ext-grpc`
+only for `client/native.php`. Protobuf's PHP runtime is required; its C extension
+is optional. Streaming requires the patched Swoole capabilities described below,
+not merely the presence of the extension.
 
-```php
-<?php
-define("ROOT",				dirname(__FILE__)."/../");
-define("ROOT_LIBS",			ROOT."/libs");
-define("ROOT_APP",			ROOT."/app");
-define("ROOT_PROTO_GENERATED",		ROOT."/proto_generated");
-require_once(ROOT_LIBS."/vendor/autoload.php");
-spl_autoload_register(function($class){
-	$root = ROOT_PROTO_GENERATED."/".str_replace("\\","/",$class).".php";
-	if(is_file($root)){
-		require_once($root);
-	}
-});
-spl_autoload_register(function($class){
-	$root = ROOT_APP."/".str_replace("\\","/",$class).".php";
-	if(is_file($root)){
-		require_once($root);
-	}
-});
+The package declares `GRpcServer`, `GRpcServerInterface`, `GRpcClient` and
+`GRpcStream` in Composer's `autoload.classmap`; they load on demand. PHP entry
+scripts include only Composer's `vendor/autoload.php`.
 
-try{
-	$content_type = (isset($_SERVER['HTTP_CONTENT_TYPE']) && $_SERVER['HTTP_CONTENT_TYPE']=='application/json') ? 'json' : null; //json | null (default)
-	if(($r=GRpcServer::run(null,null,$content_type))!==false){
-		echo($r);
-	}
-}catch(Exception $e){
-	print_r($e);
+Declare application service and generated-message namespaces in the consuming
+project's `composer.json`, then run `composer dump-autoload`:
+
+```json
+{
+  "autoload": {
+    "psr-4": {
+      "Test\\Helloworld\\": ["app/Test/Helloworld/", "proto_generated/Test/Helloworld/"],
+      "GPBMetadata\\": "proto_generated/GPBMetadata/"
+    }
+  }
 }
 ```
 
-3. or swoole server
+The runnable checkout examples declare their local library classmap, namespaces
+and helper functions in `samples/libs/composer.json`; see
+[samples/README.md](samples/README.md).
+
+2. register the request handler on a Swoole server
 
 ```php
 <?php
-require __DIR__ . '/../libs/vendor/autoload.php';
+require dirname(__DIR__) . '/vendor/autoload.php';
 
-define("ROOT",				__DIR__."/../");
-define("ROOT_APP",			__DIR__."/../app");
-define("ROOT_PROTO_GENERATED",		__DIR__."/../proto_generated/");
-spl_autoload_register(function($class){
-	$root = ROOT_PROTO_GENERATED."/".str_replace("\\","/",$class).".php";
-	if(is_file($root)){
-		require_once($root);
-	}
-});
-spl_autoload_register(function($class){
-	$root = ROOT_APP."/".str_replace("\\","/",$class).".php";
-	if(is_file($root)){
-		require_once($root);
-	}
-});
-
-
-$http = new Swoole\Http\Server('0.0.0.0', 50000, SWOOLE_BASE);
-
-$http->on('request', function (Swoole\Http\Request $request, Swoole\Http\Response $response) use ($http) {
-	$content_type = (isset($request->header['content-type']) && $request->header['content-type']=='application/json') ? 'json' : null; //json | null (default)
-	if($content_type=="json"){
-		$response->header('content-type', 'application/json');
-	}else{
-		$response->header('content-type', 'application/grpc');
-	}
-	try{
-		if(($r=GRpcServer::run($request->server['request_uri'], $request->rawContent(), $content_type))!==false){
-			//echo($r);
-			$response->header('trailer', 'grpc-status, grpc-message');
-			$trailer = [
-				"grpc-status" => "0",
-				"grpc-message" => ""
-			];
-			foreach ($trailer as $trailer_name => $trailer_value) {
-				$response->trailer($trailer_name, $trailer_value);
-			}
-			$response->end($r);
-	}
-	}catch(Exception $e){
-		$response->header('trailer', 'grpc-status, grpc-message');
-		$trailer = [
-			"grpc-status" => $e->getCode(),
-			"grpc-message" => $e->getMessage(),
-		];
-		foreach ($trailer as $trailer_name => $trailer_value) {
-			$response->trailer($trailer_name, $trailer_value);
-		}
-		$response->end();
-	}
-});
-$http->start();
-
+$server = new Swoole\Http\Server('127.0.0.1', 50051, SWOOLE_BASE);
+$server->set([
+    'open_http2_protocol' => true,
+    'http2_stream_mode' => true,
+    'http_compression' => false,
+    'package_max_length' => GRpcServer::MAX_MESSAGE_LENGTH + 5,
+]);
+$server->on('request', [GRpcServer::class, 'serve']);
+$server->start();
 ```
 
+`serve(Swoole\Http\Request $request, Swoole\Http\Response $response, ...$args)`
+is the single dispatch entry point. It reads headers and request bytes, validates
+HTTP method and content type, resolves the service, passes `$args` to its
+constructor, and finishes the response. JSON and binary RPCs share service
+resolution and invocation. No surrounding response or exception handler is needed.
+
+Only POST is accepted (otherwise HTTP 405). Supported content types are
+`application/json`, `application/grpc` and `application/grpc+proto` (otherwise
+HTTP 415); binary requests require HTTP/2 (otherwise HTTP 426). JSON bodies are
+limited to `GRpcServer::MAX_JSON_LENGTH` (2 MiB). Dispatch failures return a safe
+gRPC status 13: HTTP 500 and a JSON error for JSON, final trailers for binary.
+Only the exception class and code are logged; messages and service data are not
+returned. Callers must read the final gRPC status even after receiving messages.
+
+The former `run($uri, $data, ...)` and `getRawData()` entry points have been
+removed. Migrate callers to `serve($request, $response, ...$constructorArgs)`;
+PHP-FPM dispatch and the former `samples/www/index.php` entry are retired.
+Application-specific authentication or body transforms must be handled by the
+application's transport adapter before dispatch.
 
 # Write App Services 
 
 1. proto and genproto to php files
 
 ```bash
-cd proto && make
+cd samples
+make proto
 ```
 
 2. write gRPC Server in services dir like helloworld
@@ -130,8 +98,7 @@ cd proto && make
 <?php
 namespace Test\Helloworld;
 class Greeter implements GreeterInterface{
-	/**
-	 */
+	/** @param HelloRequest $request Greeting request message. */
 	public function SayHello(HelloRequest $request) : HelloReply{
 		$reply = new HelloReply();
 		$reply->setMessage("Hello2, ".$request->getName()."!");
@@ -141,42 +108,11 @@ class Greeter implements GreeterInterface{
 
 ```
 
-3. config nginx && php-fpm
-
-```conf
-server {
-	listen 50010 http2; #with http2 is grpc protocol
-	#listen 50010; #without http2 is json protocol
-	root /data/server/;
-	location / {
-		if (!-e $request_filename){
-			rewrite ^/(.+?)$ /index.php last;
-		}
-	}
-	location ~ \.php$ {
-		fastcgi_param REMOTE_ADDR $http_x_real_ip;
-		fastcgi_pass   127.0.0.1:9000;
-		fastcgi_index  index.php;
-		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-		include        fastcgi_params;
-	}
-}
-```
-4. test
-
+3. run the server and clients from [samples](samples/README.md), or call JSON
 
 ```bash
-# cli mode
-php client/hello.php
-
-# curl command (json request)
-# swoole (50000 port)
-curl -d '{"name":"xx"}' -v http://127.0.0.1:50000//Test.Helloworld.Greeter/SayHello -H "content-type:application/json"
-# nginx php-fpm (50010 port)
-curl -d '{"name":"xx"}' -v http://127.0.0.1:50010//Test.Helloworld.Greeter/SayHello -H "content-type:application/json"
-
-# or web browser 
-
+curl -H 'content-type: application/json' -d '{"name":"Tony"}' \
+  http://127.0.0.1:50051/Test.Helloworld.Greeter/SayHello
 ```
 
 # Unary request validation
@@ -189,19 +125,21 @@ is valid; an empty HTTP body is not a binary message.
 Flag 0 means uncompressed even when the request advertises `grpc-encoding: gzip`.
 Flag 1 requires `grpc-encoding: gzip`. Gzip is decoded incrementally with size
 checks; truncated streams, checksum failures, concatenated members and trailing
-data are rejected. Streaming RPC requests are not supported by this dispatcher.
+data are rejected. These single-message checks apply to unary input; streaming
+input is parsed one message at a time by `GRpcStream`.
 
 `GRpcServer::MAX_MESSAGE_LENGTH` defaults to 16 MiB, excluding the five-byte frame
 header, and bounds both the wire payload and decoded payload. Direct decoder
 callers may pass a positive byte limit as the optional fifth argument to
 `decode()`. JSON decoding retains its existing format and unknown-field behavior.
-Binary framing and decompression are validated before request and service
-construction. Existing `run()` exception wrapping remains unchanged.
+Binary framing and decompression are validated before unary service construction.
+Streaming input is decoded as the service consumes it. `serve()` catches all
+`Throwable` failures and finishes with the safe status described above.
 
 # RPC routing conventions
 
-From 1.7.9, dispatch follows the 1.7.7 service/interface convention, with path
-validation and an `is_callable()` check. No namespace allowlist is required.
+Dispatch follows the service/interface convention, with path and method
+validation. No namespace allowlist is required.
 The `setServiceNamespaces()` configuration introduced in 1.7.8 has been removed;
 remove those calls when upgrading.
 
@@ -222,12 +160,93 @@ The default is `Interface`. The suffix must be a nonempty ASCII identifier;
 invalid values throw `InvalidArgumentException` without changing the setting.
 This configures the implemented interface name, not the service path or class.
 
-The dispatcher reflects the target method's first parameter type to decode the
-request, constructs the service with arguments from `run()`'s fifth argument
-onward, then checks `is_callable([$service, $method])` before invoking it.
-Private and protected methods without magic-call handling are not callable.
-As in 1.7.7, public helper methods can be dispatched even when absent from the
-interface; `NAME` constants and strict unary method signatures are not checked.
-Treat service classes and their callable methods as RPC entry points under this
-convention. Authentication and authorization remain the service's responsibility.
-The frame validation and gzip limits introduced in 1.7.7 are unchanged.
+The dispatcher requires a public instance method with a named class type for
+its first parameter. It decodes the request (or supplies `GRpcStream`), then
+constructs the service using arguments after the request and response arguments
+of `serve()`. Private, protected and static methods are rejected. Public helper
+methods can still be dispatched even when absent from the interface; `NAME`
+constants are not checked. Treat service classes and their public instance
+methods as RPC entry points. Authentication and authorization remain the
+application's responsibility.
+
+## Coroutine streaming RPCs
+
+Binary HTTP/2 supports client streaming, server streaming and bidirectional
+streaming with the Swoole `http2_stream_mode` / `Request::recv()` patch. Enable
+it explicitly on either `Swoole\Http\Server` (with coroutines enabled) or
+`Swoole\Coroutine\Http\Server`:
+
+```php
+$server->set(['open_http2_protocol' => true, 'http2_stream_mode' => true]);
+$server->handle('/', [GRpcServer::class, 'serve']);
+```
+
+For the event server, register the same callback with `on('request', ...)`.
+In stream mode, HTTP/2 callbacks start after headers and read the body with
+`recv()`; `rawContent()` is not a whole-request snapshot. HTTP/1 is unchanged.
+The same `serve()` callback collects HTTP/2 JSON bodies within the size limit.
+JSON is unary; streaming uses binary gRPC. Whole-body AES is an application
+transport concern and is not implemented by this library.
+
+The interface generator emits these signatures from the `.proto` stream flags.
+Regenerate interfaces using the matching local generator; do not edit generated
+files. Existing unary interface output is unchanged.
+
+```php
+// rpc Expand(Request) returns (stream Reply)
+public function Expand(Request $request): iterable {
+    yield new Reply(['value' => $request->getValue()]);
+    yield new Reply(['value' => 'next']);
+}
+
+// rpc Collect(stream Request) returns (Reply)
+public function Collect(GRpcStream $request): Reply {
+    $values = [];
+    while (($message = $request->recv(Request::class)) !== null) {
+        $values[] = $message->getValue();
+    }
+    return new Reply(['value' => implode(',', $values)]);
+}
+
+// rpc Chat(stream Request) returns (stream Reply)
+public function Chat(GRpcStream $request): iterable {
+    while (($message = $request->recv(Request::class)) !== null) {
+        yield new Reply(['value' => $message->getValue()]);
+    }
+}
+```
+
+A single client API handles all RPC forms inside a Swoole coroutine:
+
+```php
+$call = new GRpcClient('127.0.0.1', 50051, '/Example.Service/Chat', Reply::class);
+try {
+    $call->send(new Request(['value' => 'first']));
+    $reply = $call->recv(); // The server can reply before request half-close.
+    $call->send(new Request(['value' => 'second']));
+    $call->closeSend();
+    while (($reply = $call->recv()) !== null) {
+        // Consume remaining responses.
+    }
+} finally {
+    $call->close();
+}
+```
+
+`recv()` returns a Protobuf message, or `null` after clean final status 0.
+Transport, deadline, malformed messages and unsuccessful/missing final status
+throw exceptions; always read through final status before claiming success.
+`closeSend()` only ends the sending half; `close()` cancels the call. One call
+allows one application reader and one application writer to run concurrently;
+do not issue multiple simultaneous reads or multiple simultaneous writes on the same call.
+Each call owns one HTTP/2 connection and one receiver coroutine, with a bounded incoming
+queue; there is no shared static channel or automatic retry. The constructor's
+optional timeout defaults to five seconds and covers the call, not each message.
+TLS is selected by the optional sixth argument; metadata is the seventh argument
+and contains HTTP/2 wire header values (binary metadata must be base64 encoded).
+
+Message framing accepts fragmented/coalesced HTTP/2 DATA and independent gzip
+messages. Wire and decoded messages are each limited to 16 MiB by default;
+limits are per message, so streams may transfer more than 16 MiB in total.
+The transport returns stream receive credit as the application consumes bytes.
+Timeouts, cancellation and connection closure wake blocked readers/writers.
