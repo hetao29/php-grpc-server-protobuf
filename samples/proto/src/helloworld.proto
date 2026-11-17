@@ -26,6 +26,12 @@ service Greeter {
 	rpc EchoAbort(HelloRequest) returns (HelloReply) {};
 
 	rpc ServerStreamingEcho(ServerStreamingEchoRequest) returns (stream ServerStreamingEchoResponse);
+
+	// Return one reply after the client finishes sending all requests.
+	rpc ClientStreamingEcho(stream HelloRequest) returns (HelloReply);
+
+	// Reply to each request before the client half-closes the stream.
+	rpc BidiStreamingEcho(stream HelloRequest) returns (stream HelloReply);
 }
 
 // The request message containing the user's name.

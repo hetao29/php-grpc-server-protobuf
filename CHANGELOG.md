@@ -14,6 +14,8 @@
 
 - `GRpcServer::serve(Request, Response, ...构造参数)` 统一承接二进制与 JSON unary、HTTP 校验、服务调度、响应和错误处理。
 - Composer `autoload.classmap` 按需加载库类型；示例通过 PSR-4 和 `autoload.files` 加载业务类与公共函数。
+- 示例 Makefile 统一使用 Docker Hub 镜像 `hetao29/docker-protoc:36.2.1` 生成消息、原生客户端和服务端接口。
+- 示例通过 Composer 固定引用官方 `hetao29/php-grpc-server-protobuf:2.0.0`，移除指向根目录库源码的本地 classmap。
 - JSON 请求体统一限制为 2 MiB；二进制每条消息的线上与解压 payload 保持 16 MiB 上限。
 - 失败统一输出安全状态 13，服务方法限定为具有具体请求类参数的公共实例方法。
 

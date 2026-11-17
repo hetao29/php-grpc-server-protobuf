@@ -10,19 +10,17 @@ This checkout is version **2.0.0**. See the [Chinese manual](MANUAL.md),
 
 # Usage
 
-1. install with Composer after version 2.0.0 has been published
+1. install version 2.0.0 with Composer
 
 ```bash
 composer require "hetao29/php-grpc-server-protobuf:2.0.0"
 ```
 
-Declaring this local version does not publish a package or create a Git tag.
-To run the current checkout, install the dependencies under `samples/libs`
-as described in the examples. Package installation currently requires both
-`ext-swoole` and `ext-grpc`; the checkout examples require native `ext-grpc`
-only for `client/native.php`. Protobuf's PHP runtime is required; its C extension
-is optional. Streaming requires the patched Swoole capabilities described below,
-not merely the presence of the extension.
+The runnable examples install this published package under `samples/libs/vendor`.
+Composer installation requires both `ext-swoole` and `ext-grpc`; only
+`client/native.php` uses native grpc for RPC transport. Protobuf's PHP runtime
+is required; its C extension is optional. Streaming requires the patched Swoole
+capabilities described below, not merely the presence of the extension.
 
 The package declares `GRpcServer`, `GRpcServerInterface`, `GRpcClient` and
 `GRpcStream` in Composer's `autoload.classmap`; they load on demand. PHP entry
@@ -42,8 +40,8 @@ project's `composer.json`, then run `composer dump-autoload`:
 }
 ```
 
-The runnable checkout examples declare their local library classmap, namespaces
-and helper functions in `samples/libs/composer.json`; see
+The runnable examples declare the official package dependency, application
+namespaces and helper functions in `samples/libs/composer.json`; see
 [samples/README.md](samples/README.md).
 
 2. register the request handler on a Swoole server
@@ -89,6 +87,7 @@ application's transport adapter before dispatch.
 
 ```bash
 cd samples
+make pull
 make proto
 ```
 
@@ -189,8 +188,9 @@ JSON is unary; streaming uses binary gRPC. Whole-body AES is an application
 transport concern and is not implemented by this library.
 
 The interface generator emits these signatures from the `.proto` stream flags.
-Regenerate interfaces using the matching local generator; do not edit generated
-files. Existing unary interface output is unchanged.
+The sample Makefile generates code using Docker Hub image
+`hetao29/docker-protoc:36.2.1` (protoc 36.2 and interface plugin 2.0.0).
+Do not edit generated files. Existing unary interface signatures are unchanged.
 
 ```php
 // rpc Expand(Request) returns (stream Reply)

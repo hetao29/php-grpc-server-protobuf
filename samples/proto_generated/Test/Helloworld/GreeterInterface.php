@@ -11,8 +11,7 @@ interface GreeterInterface
     public const NAME = "Test.Helloworld.Greeter";
 
     /**
-    * @param GRPC\ContextInterface $ctx
-    * @param HelloRequest $in
+    * @param HelloRequest $request
     * @return HelloReply
     *
     * @throws \Exception
@@ -20,8 +19,7 @@ interface GreeterInterface
     public function SayHello(HelloRequest $request): HelloReply;
 
     /**
-    * @param GRPC\ContextInterface $ctx
-    * @param HelloRequest $in
+    * @param HelloRequest $request
     * @return HelloReply
     *
     * @throws \Exception
@@ -29,11 +27,26 @@ interface GreeterInterface
     public function EchoAbort(HelloRequest $request): HelloReply;
 
     /**
-    * @param GRPC\ContextInterface $ctx
-    * @param ServerStreamingEchoRequest $in
-    * @return ServerStreamingEchoResponse
+    * @param ServerStreamingEchoRequest $request
+    * @return iterable<ServerStreamingEchoResponse>
     *
     * @throws \Exception
     */
-    public function ServerStreamingEcho(ServerStreamingEchoRequest $request): ServerStreamingEchoResponse;
+    public function ServerStreamingEcho(ServerStreamingEchoRequest $request): iterable;
+
+    /**
+    * @param \GRpcStream $request Stream of HelloRequest messages.
+    * @return HelloReply
+    *
+    * @throws \Exception
+    */
+    public function ClientStreamingEcho(\GRpcStream $request): HelloReply;
+
+    /**
+    * @param \GRpcStream $request Stream of HelloRequest messages.
+    * @return iterable<HelloReply>
+    *
+    * @throws \Exception
+    */
+    public function BidiStreamingEcho(\GRpcStream $request): iterable;
 }

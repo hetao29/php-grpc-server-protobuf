@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9725b0d7c4c53a6e28307918c52fe768",
+    "content-hash": "bf14823096a01308b786533f7caf849b",
     "packages": [
         {
             "name": "google/protobuf",
@@ -96,16 +96,16 @@
         },
         {
             "name": "hetao29/php-grpc-server-protobuf",
-            "version": "1.7.4",
+            "version": "2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hetao29/php-grpc-server-protobuf.git",
-                "reference": "dfbd2948241d741986395fa7a910a24bf0297a7d"
+                "reference": "df6b9f8e9f9abd81c958823d941488a0bccac17f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hetao29/php-grpc-server-protobuf/zipball/dfbd2948241d741986395fa7a910a24bf0297a7d",
-                "reference": "dfbd2948241d741986395fa7a910a24bf0297a7d",
+                "url": "https://api.github.com/repos/hetao29/php-grpc-server-protobuf/zipball/df6b9f8e9f9abd81c958823d941488a0bccac17f",
+                "reference": "df6b9f8e9f9abd81c958823d941488a0bccac17f",
                 "shasum": ""
             },
             "require": {
@@ -116,8 +116,10 @@
             },
             "type": "library",
             "autoload": {
-                "files": [
-                    "GRpcServer.php"
+                "classmap": [
+                    "GRpcServer.php",
+                    "GRpcClient.php",
+                    "GRpcStream.php"
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -131,32 +133,33 @@
                     "homepage": "https://github.com/hetao29"
                 }
             ],
-            "description": "The php grpc server framework with protobuf and DO NOT use any 3rd libraries.",
+            "description": "Swoole gRPC server and coroutine client with Protobuf, JSON unary and streaming RPC support.",
             "homepage": "https://github.com/hetao29/php-grpc-server-protobuf",
             "keywords": [
+                "client",
                 "gRPC",
-                "nginx",
                 "php",
-                "php-fpm",
                 "protobuf",
-                "server"
+                "server",
+                "streaming",
+                "swoole"
             ],
             "support": {
                 "issues": "https://github.com/hetao29/php-grpc-server-protobuf/issues",
-                "source": "https://github.com/hetao29/php-grpc-server-protobuf/tree/1.7.4"
+                "source": "https://github.com/hetao29/php-grpc-server-protobuf/tree/2.0.0"
             },
-            "time": "2024-04-24T03:53:45+00:00"
+            "time": "2026-11-17T08:47:38+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "ext-swoole": "*"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
 }

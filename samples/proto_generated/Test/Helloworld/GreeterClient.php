@@ -38,7 +38,7 @@ class GreeterClient extends \Grpc\BaseStub {
      * @param \Test\Helloworld\HelloRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Grpc\UnaryCall
+     * @return \Grpc\UnaryCall<\Test\Helloworld\HelloReply>
      */
     public function SayHello(\Test\Helloworld\HelloRequest $argument,
       $metadata = [], $options = []) {
@@ -53,7 +53,7 @@ class GreeterClient extends \Grpc\BaseStub {
      * @param \Test\Helloworld\HelloRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Grpc\UnaryCall
+     * @return \Grpc\UnaryCall<\Test\Helloworld\HelloReply>
      */
     public function EchoAbort(\Test\Helloworld\HelloRequest $argument,
       $metadata = [], $options = []) {
@@ -74,6 +74,30 @@ class GreeterClient extends \Grpc\BaseStub {
         return $this->_serverStreamRequest('/Test.Helloworld.Greeter/ServerStreamingEcho',
         $argument,
         ['\Test\Helloworld\ServerStreamingEchoResponse', 'decode'],
+        $metadata, $options);
+    }
+
+    /**
+     * Return one reply after the client finishes sending all requests.
+     * @param array $metadata metadata
+     * @param array $options call options
+     * @return \Grpc\ClientStreamingCall
+     */
+    public function ClientStreamingEcho($metadata = [], $options = []) {
+        return $this->_clientStreamRequest('/Test.Helloworld.Greeter/ClientStreamingEcho',
+        ['\Test\Helloworld\HelloReply','decode'],
+        $metadata, $options);
+    }
+
+    /**
+     * Reply to each request before the client half-closes the stream.
+     * @param array $metadata metadata
+     * @param array $options call options
+     * @return \Grpc\BidiStreamingCall
+     */
+    public function BidiStreamingEcho($metadata = [], $options = []) {
+        return $this->_bidiRequest('/Test.Helloworld.Greeter/BidiStreamingEcho',
+        ['\Test\Helloworld\HelloReply','decode'],
         $metadata, $options);
     }
 

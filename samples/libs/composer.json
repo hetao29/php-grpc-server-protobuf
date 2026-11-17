@@ -1,9 +1,18 @@
 {
 	"require": {
+		"hetao29/php-grpc-server-protobuf": "2.0.0",
 		"google/protobuf": "*",
 		"grpc/grpc": "*",
-		"ext-swoole": "*",
-		"hetao29/php-grpc-server-protobuf": "*"
+		"ext-swoole": "*"
+	},
+	"autoload": {
+		"psr-4": {
+			"Test\\Helloworld\\": ["../app/Test/Helloworld/", "../proto_generated/Test/Helloworld/"],
+			"User\\Info\\": ["../app/User/Info/", "../proto_generated/User/Info/"],
+			"Common\\": "../proto_generated/Common/",
+			"GPBMetadata\\": "../proto_generated/GPBMetadata/"
+		},
+		"files": ["../functions.php"]
 	},
 	"repositories": {
 		"packagist": {

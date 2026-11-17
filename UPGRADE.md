@@ -10,11 +10,11 @@
 
 ## 2. 改用 Composer 加载
 
-发布后将消费项目约束改为 `hetao29/php-grpc-server-protobuf:2.0.0`。当前源码版本声明不等于已经发布。
+将消费项目约束改为 `hetao29/php-grpc-server-protobuf:2.0.0`，通过 Composer 安装官方包。
 
 移除手写 `spl_autoload_register`、ClassLoader 配置和逐类 require，在业务项目的 Composer `autoload.psr-4` 中声明服务及生成代码，然后运行 `composer dump-autoload`。入口只加载一次 `vendor/autoload.php`；库自身的全局类型由 `autoload.classmap` 按需加载。
 
-仓库示例通过自己的 classmap 加载根源码，不再依赖 vendor 内的旧版同名库副本。不要在同一进程混载两版全局 `GRpcServer`。
+仓库示例固定依赖官方 2.0.0，由包自身的 Composer 配置加载库类型；示例只配置应用命名空间及公共函数，不配置指向根源码的 classmap。不要在同一进程混载两版全局 `GRpcServer`。
 
 ## 3. 替换服务入口
 

@@ -6,7 +6,7 @@
 
 验证环境为 PHP 8.4.27，服务端使用包含本次流式补丁的 Swoole。需要 `http2_stream_mode` 和 `Swoole\Http\Request::recv()`；客户端还使用 HTTP/2 pipeline 增量接收。仅检查普通 Swoole 版本号不能证明具备这些能力。
 
-发布后可用 `composer require 'hetao29/php-grpc-server-protobuf:2.0.0'` 安装。当前本地版本声明不代表已发布或已有 Git 标签。包的现有依赖声明包含 `ext-swoole`、`ext-grpc`、`google/protobuf` 和 `grpc/grpc`，本次没有升级这些依赖。仓库示例单独管理依赖，只有原生客户端示例需要 grpc 扩展。Protobuf C 扩展可选。
+可用 `composer require 'hetao29/php-grpc-server-protobuf:2.0.0'` 安装官方包。包的现有依赖声明包含 `ext-swoole`、`ext-grpc`、`google/protobuf` 和 `grpc/grpc`。仓库示例也通过 Composer 固定引用官方 2.0.0，不加载根目录的本地库源码；安装依赖时需要两个扩展，实际运行中只有原生客户端示例使用 grpc 扩展进行 RPC 传输。Protobuf C 扩展可选。
 
 库在 `composer.json` 的 `autoload.classmap` 中声明四个全局类型：`GRpcServer`、`GRpcServerInterface`、`GRpcStream`、`GRpcClient`。业务项目在自己的 `autoload.psr-4` 中声明服务实现和生成代码；配置示例见 [README.md](README.md)。更新配置后运行 `composer dump-autoload`，入口仅加载 `vendor/autoload.php`，不逐个 require 类文件。
 
@@ -42,7 +42,7 @@ $server->handle('/', static function ($request, $response): void {
 | 流 / 单条 | `GRpcStream $request` | `Reply` |
 | 流 / 流 | `GRpcStream $request` | `iterable`，元素为 Reply |
 
-接口由配套生成器读取 proto 的 stream 标志生成，不手改生成文件。具体服务实现见 [Greeter.php](samples/app/Test/Helloworld/Greeter.php)。`GRpcStream::recv(Request::class)` 每次读取一条消息，干净半关闭时返回 `null`；`send($reply)` 写一条消息，失败抛出异常。服务可用 `yield` 输出消息；直接 `send()` 的服务也可按自行声明的接口返回 `void`，不要改写生成器定义的返回契约。
+接口由配套生成器读取 proto 的 stream 标志生成，不手改生成文件。示例在 `samples` 执行 `make proto`，统一使用 Docker Hub 的 `hetao29/docker-protoc:36.2.1` 镜像（protoc 36.2、接口插件 2.0.0），不调用宿主机的 protoc 或本地插件。具体服务实现见 [Greeter.php](samples/app/Test/Helloworld/Greeter.php)。`GRpcStream::recv(Request::class)` 每次读取一条消息，干净半关闭时返回 `null`；`send($reply)` 写一条消息，失败抛出异常。服务可用 `yield` 输出消息；直接 `send()` 的服务也可按自行声明的接口返回 `void`，不要改写生成器定义的返回契约。
 
 客户端流必须读取到半关闭才能知道输入结束。双向流可以读取一条就回复一条，无需先收齐所有请求。单条输入必须恰好包含一个完整消息，空 body 或第二条消息均为错误；长度为零的 Protobuf 消息仍需五字节帧头。
 

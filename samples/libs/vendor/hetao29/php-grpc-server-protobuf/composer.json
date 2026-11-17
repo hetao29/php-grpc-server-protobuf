@@ -1,0 +1,28 @@
+{
+	"name": "hetao29/php-grpc-server-protobuf",
+	"version": "2.0.0",
+	"description": "Swoole gRPC server and coroutine client with Protobuf, JSON unary and streaming RPC support.",
+	"keywords": ["php", "grpc", "server", "client", "protobuf", "swoole", "streaming"],
+	"homepage": "https://github.com/hetao29/php-grpc-server-protobuf",
+	"type": "library",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "hetao",
+			"email": "hetao@hetao.name",
+			"homepage": "https://github.com/hetao29"
+		}
+	],
+	"require": {
+		"ext-grpc": "*",
+		"ext-swoole": "*",
+		"google/protobuf": "*",
+		"grpc/grpc": "*"
+	},
+	"archive":{
+		"exclude":["/samples"]
+	},
+	"autoload":{
+		"classmap":["GRpcServer.php", "GRpcClient.php", "GRpcStream.php"]
+	}
+}

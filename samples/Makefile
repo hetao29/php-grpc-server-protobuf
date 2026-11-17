@@ -1,22 +1,38 @@
-ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-all:
-	#其它语言的生成，请参考, https://github.com/hetao29/docker-protoc
-	#生成client
-	find proto/src/ -name "*.proto" | xargs -I {} sudo docker run --rm -v ${ROOT_DIR}:${ROOT_DIR} -w ${ROOT_DIR} hetao29/docker-protoc:latest protoc \
-		--plugin=protoc-gen-grpc=/usr/bin/grpc_php_plugin --grpc_out=proto_generated --php_out=proto_generated -I proto/ -I . \
-		"{}"
-	#生成服务端interface
-	find proto/src/ -name "*.proto" | xargs -I {} sudo docker run --rm -v ${ROOT_DIR}:${ROOT_DIR} -w ${ROOT_DIR} hetao29/docker-protoc:latest protoc \
-		--plugin=protoc-gen-grpc=/usr/bin/protoc-gen-php-grpc --grpc_out=proto_generated --php_out=proto_generated -I proto/ -I . \
-		"{}"
-install:
-	sudo apt install -y protobuf-compiler
-	sudo pecl install grpc
-	sudo pecl install swoole
-link:
-	sudo ln -s /data/php-grpc-server-protobuf/samples/conf/supervisor.conf /etc/supervisor/conf.d/grpc.samples.conf
-	sudo supervisorctl reread
-	sudo supervisorctl update
-	sudo supervisorctl restart grpc:samples
-restart:
-	sudo supervisorctl restart grpc:samples
+ROOT_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+PHP ?= php
+PHP_FLAGS ?=
+DOCKER ?= sudo docker
+IMAGE ?= hetao29/docker-protoc:36.2.1
+OUTPUT_DIR ?= $(ROOT_DIR)/proto_generated
+PROTO_FILES ?= src/helloworld.proto
+HOST ?= 127.0.0.1
+PORT ?= 50051
+MODE ?= coroutine
+
+.PHONY: all proto pull versions server unary server-stream client-stream bidi-stream native
+all: proto
+
+proto:
+	mkdir -p "$(OUTPUT_DIR)"
+	$(DOCKER) run --rm --user "$(shell id -u):$(shell id -g)" \
+		-v "$(ROOT_DIR):/workspace:ro" -v "$(abspath $(OUTPUT_DIR)):/generated" \
+		-w /workspace/proto $(IMAGE) protoc -I . -I /usr/local/include \
+		--plugin=protoc-gen-grpc=/usr/bin/grpc_php_plugin \
+		--plugin=protoc-gen-php-grpc=/usr/bin/protoc-gen-php-grpc \
+		--php_out=/generated --grpc_out=/generated --php-grpc_out=/generated $(PROTO_FILES)
+
+pull:
+	$(DOCKER) pull $(IMAGE)
+
+versions:
+	$(DOCKER) run --rm $(IMAGE) protoc --version
+	$(DOCKER) run --rm $(IMAGE) protoc-gen-php-grpc --version
+
+server:
+	$(PHP) $(PHP_FLAGS) "$(ROOT_DIR)/server/server.php" "$(HOST)" "$(PORT)" "$(MODE)"
+
+unary:
+	$(PHP) $(PHP_FLAGS) "$(ROOT_DIR)/client/hello.php" "$(HOST)" "$(PORT)"
+
+server-stream client-stream bidi-stream native:
+	$(PHP) $(PHP_FLAGS) "$(ROOT_DIR)/client/$@.php" "$(HOST)" "$(PORT)"

@@ -1,0 +1,14 @@
+{
+	"require": {
+		"google/protobuf": "*",
+		"grpc/grpc": "*",
+		"ext-swoole": "*",
+		"hetao29/php-grpc-server-protobuf": "*"
+	},
+	"repositories": {
+		"packagist": {
+			"type": "composer",
+			"url": "https://packagist.org"
+		}
+	}
+}
